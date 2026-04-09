@@ -15,7 +15,7 @@
         .status-pill { padding: 4px 12px; border-radius: 9999px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
         
         .modal-overlay { 
-            position: fixed; inset: 0; z-index: 200; 
+            position: fixed; inset: 0; z-index: 100; 
             background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px);
             display: flex; align-items: center; justify-content: center; padding: 1.5rem;
             opacity: 0; pointer-events: none; transition: all 0.3s ease;
@@ -28,56 +28,48 @@
         .modal-active { opacity: 1; pointer-events: auto; }
         .modal-active .modal-container { transform: scale(1); }
         
-        .auth-card { background: white; border-radius: 2.5rem; width: 100%; max-width: 42rem; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .auth-card { background: white; border-radius: 2.5rem; width: 100%; max-width: 32rem; padding: 3rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         .hidden-el { display: none !important; }
         
-        input, select { border: 2px solid #f1f5f9 !important; border-radius: 1rem !important; padding: 0.85rem 1.25rem !important; font-weight: 700 !important; outline: none !important; width: 100%; transition: all 0.2s ease;}
+        input, select { border: 2px solid #f1f5f9 !important; border-radius: 1rem !important; padding: 1rem 1.5rem !important; font-weight: 700 !important; outline: none !important; width: 100%; transition: all 0.2s ease;}
         input:focus, select:focus { border-color: #4f46e5 !important; background: #f8fafc !important; }
 
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; margin: 0; }
+            
+            body.invoice-mode #app-content,
+            body.invoice-mode #auth-screen,
+            body.invoice-mode .modal-overlay,
+            body.invoice-mode aside,
+            body.invoice-mode nav { display: none !important; }
+            body.invoice-mode #invoice-print-template { display: block !important; }
+        }
+
+        #invoice-print-template { display: none; }
+        
+        /* Cloud Loader */
         #cloud-loader {
-            position: fixed; inset: 0; z-index: 9999; background: #020617;
+            position: fixed; inset: 0; z-index: 999; background: #020617;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease; text-align: center;
+            transition: opacity 0.5s ease;
         }
         .spinner {
             width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.1);
             border-top-color: #4f46e5; border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Toast UI */
-        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast { background: #1e293b; color: white; padding: 12px 24px; border-radius: 12px; font-size: 12px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); transform: translateX(120%); transition: transform 0.3s ease; pointer-events: auto; }
-        .toast.show { transform: translateX(0); }
     </style>
 
     <script>
-        // --- GLOBAL UI FUNCTIONS ---
-        window.currentViewName = 'view-dashboard';
-        window.isSidebarOpen = false;
-
-        window.showToast = function(msg, type = 'info') {
-            const container = document.getElementById('toast-container');
-            if(!container) return;
-            const el = document.createElement('div');
-            el.className = 'toast';
-            el.innerText = msg;
-            if(type === 'error') el.style.borderLeft = '4px solid #ef4444';
-            if(type === 'success') el.style.borderLeft = '4px solid #10b981';
-            
-            container.appendChild(el);
-            setTimeout(() => el.classList.add('show'), 10);
-            setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3500);
-        };
-
-        window.uiModal = function(id, open) {
-            const m = document.getElementById(id);
-            if (m) {
-                if (open) m.classList.add('modal-active');
-                else m.classList.remove('modal-active');
-            }
-        };
-
+        // Fungsi UI Sederhana (Didefinisikan di awal)
+        window.currentViewName = 'dashboard';
+        
         window.showRegister = function() {
             document.getElementById('login-view').classList.add('hidden-el');
             document.getElementById('register-view').classList.remove('hidden-el');
@@ -89,247 +81,337 @@
         };
 
         window.handleRoleChange = function(role) {
-            const nikBox = document.getElementById('nik-input-container');
-            const tierBox = document.getElementById('tier-input-container');
             const adminBox = document.getElementById('admin-info-box');
+            const nikBox = document.getElementById('nik-input-container');
             
-            if(adminBox) adminBox.classList.add('hidden-el');
-            if(nikBox) nikBox.classList.remove('hidden-el');
-            if(tierBox) tierBox.classList.add('hidden-el');
-
             if (role === 'admin') {
-                if(adminBox) adminBox.classList.remove('hidden-el');
+                adminBox.classList.remove('hidden-el');
                 if(nikBox) nikBox.classList.add('hidden-el');
-            } else if (role === 'investor') {
-                if(tierBox) tierBox.classList.remove('hidden-el');
+            } else {
+                adminBox.classList.add('hidden-el');
+                if(nikBox) nikBox.classList.remove('hidden-el');
             }
+        };
+
+        window.uiModal = function(id, open) {
+            const m = document.getElementById(id);
+            if (open) m.classList.add('modal-active');
+            else m.classList.remove('modal-active');
         };
 
         window.switchView = function(viewName) {
             window.currentViewName = viewName;
-            const views = ['view-dashboard', 'view-projects', 'view-customers', 'view-investors', 'view-rekanan'];
-            views.forEach(v => {
-                const el = document.getElementById(v);
-                if(el) el.classList.add('hidden-el');
-            });
-            const target = document.getElementById(viewName);
-            if(target) target.classList.remove('hidden-el');
-            if(window.innerWidth < 1024 && window.isSidebarOpen) window.toggleSidebar();
-            if(typeof window.autoRefreshUI === 'function') window.autoRefreshUI();
-        };
+            document.getElementById('view-dashboard').classList.add('hidden-el');
+            document.getElementById('view-projects').classList.add('hidden-el');
+            document.getElementById('view-customers').classList.add('hidden-el');
+            document.getElementById('view-investors').classList.add('hidden-el');
+            document.getElementById('view-rekanan').classList.add('hidden-el');
+            document.getElementById('view-chat').classList.add('hidden-el');
 
-        window.toggleSidebar = function() {
-            const sidebar = document.getElementById('main-sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            window.isSidebarOpen = !window.isSidebarOpen;
-            if(window.isSidebarOpen) {
-                if(sidebar) sidebar.classList.remove('-translate-x-full');
-                if(overlay) overlay.classList.remove('hidden-el');
-            } else {
-                if(sidebar) sidebar.classList.add('-translate-x-full');
-                if(overlay) overlay.classList.add('hidden-el');
+            if(viewName === 'dashboard') {
+                document.getElementById('view-dashboard').classList.remove('hidden-el');
+                if(typeof window.refreshProjectData === 'function') window.refreshProjectData();
+            } else if(viewName === 'projects') {
+                document.getElementById('view-projects').classList.remove('hidden-el');
+                if(typeof window.renderProjectTable === 'function') window.renderProjectTable();
+            } else if(viewName === 'customers') {
+                document.getElementById('view-customers').classList.remove('hidden-el');
+                if(typeof window.renderUserTable === 'function') window.renderUserTable('customer');
+            } else if(viewName === 'investors') {
+                document.getElementById('view-investors').classList.remove('hidden-el');
+                if(typeof window.renderUserTable === 'function') window.renderUserTable('investor');
+            } else if(viewName === 'rekanan') {
+                document.getElementById('view-rekanan').classList.remove('hidden-el');
+                if(typeof window.renderUserTable === 'function') window.renderUserTable('rekanan');
+            } else if(viewName === 'chat') {
+                document.getElementById('view-chat').classList.remove('hidden-el');
+                if(typeof window.renderChatContacts === 'function') window.renderChatContacts();
             }
         };
 
-        window.sharePortal = function() {
-            const link = window.location.origin + window.location.pathname;
-            const fallbackCopy = (text) => {
-                const el = document.createElement('textarea');
-                el.value = text;
-                document.body.appendChild(el);
-                el.select();
-                try {
-                    document.execCommand('copy');
-                    window.showToast("Link portal berhasil disalin!", "success");
-                } catch(e) {
-                    alert("Salin manual: " + text);
-                }
-                document.body.removeChild(el);
-            };
-
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(link).then(() => {
-                    window.showToast("Link portal berhasil disalin!", "success");
-                }).catch(() => fallbackCopy(link));
-            } else {
-                fallbackCopy(link);
-            }
-        };
-
-        window.forceHideLoader = function() {
-            const loader = document.getElementById('cloud-loader');
-            if (loader) loader.style.display = 'none';
+        window.goToProjectFromAdmin = function(projId) {
+            window.switchView('dashboard');
+            const selector = document.getElementById('proj-select');
+            if(selector) selector.value = projId;
+            if(typeof window.changeActiveProject === 'function') window.changeActiveProject(projId);
+            setTimeout(() => {
+                const target = document.getElementById('dash-view');
+                if(target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
         };
     </script>
 </head>
+
+<script>
+</script>
 <body class="bg-slate-50 text-slate-900 min-h-screen text-left">
 
-    <div id="toast-container"></div>
-
-    <!-- LOADER -->
-    <div id="cloud-loader">
-        <div class="spinner mb-4"></div>
-        <p class="text-white font-bold tracking-widest uppercase text-xs animate-pulse mt-4">Sinkronisasi Cloud Kalimaja...</p>
+    <!-- CLOUD LOADER -->
+    <div id="cloud-loader" class="fixed inset-0 z-[999] bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+        <p class="text-white font-bold tracking-widest uppercase text-xs animate-pulse">Menghubungkan Database Cloud...</p>
     </div>
 
-    <!-- AUTH SCREEN -->
+    <!-- LAYAR AUTENTIKASI -->
     <div id="auth-screen" class="fixed inset-0 z-[200] bg-slate-950 flex items-center justify-center p-6 overflow-y-auto hidden-el">
-        <div class="auth-card">
+        <div class="auth-card shadow-2xl border border-white/10 mt-10 mb-10">
             <div class="text-center mb-10">
-                <div class="h-16 w-16 bg-indigo-600 rounded-3xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl">
-                    <i class="fas fa-bolt text-2xl text-amber-300"></i>
+                <div class="h-20 w-20 bg-indigo-600 rounded-3xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl">
+                    <i class="fas fa-bolt text-3xl text-amber-300"></i>
                 </div>
-                <h2 class="text-3xl font-black italic uppercase text-slate-900 leading-none tracking-tighter">Portal <span class="text-indigo-600">Kalimaja</span></h2>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-3">Smart Energy Management</p>
+                <h2 class="text-3xl font-black italic uppercase tracking-tighter text-slate-900 leading-none">Portal <span class="text-indigo-600">Kalimaja</span></h2>
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-3">Smart Energy System</p>
             </div>
 
+            <!-- TAMPILAN LOGIN -->
             <div id="login-view">
                 <div class="space-y-4">
-                    <div class="text-left"><label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Email Akses</label><input type="email" id="login-email" placeholder="email@domain.com"></div>
-                    <div class="text-left"><label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Kata Sandi</label><input type="password" id="login-password" placeholder="••••••••"></div>
-                    <button onclick="window.doLogin()" class="w-full bg-indigo-950 text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg">Masuk Dashboard</button>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Email Terdaftar</label>
+                        <input type="email" id="login-email" placeholder="email@bisnis.com">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Kata Sandi</label>
+                        <input type="password" id="login-password" placeholder="••••••••">
+                    </div>
+                    <button onclick="window.doLogin()" class="w-full bg-indigo-950 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-black transition-all mt-4 shadow-lg">Masuk Dashboard</button>
                 </div>
-                <p class="mt-8 text-center text-xs font-bold text-slate-500">Belum memiliki akun? <button onclick="window.showRegister()" class="text-indigo-600 underline">Daftar Sekarang</button></p>
+                <div class="text-center pt-6 border-t border-slate-100 mt-6">
+                    <p class="text-xs font-bold text-slate-500 text-center w-full">
+                        Belum punya akun? <button onclick="window.showRegister()" class="text-indigo-600 underline font-black ml-1">Daftar Sekarang</button>
+                    </p>
+                </div>
             </div>
 
-            <div id="register-view" class="hidden-el text-left">
+            <!-- TAMPILAN REGISTER -->
+            <div id="register-view" class="hidden-el">
                 <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div><label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Nama Lengkap</label><input type="text" id="reg-name" placeholder="Nama Sesuai KTP"></div>
-                        <div id="nik-input-container"><label class="text-[10px] font-black text-slate-400 uppercase px-2 block">NIK</label><input type="number" id="reg-nik" placeholder="16 Digit NIK"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Nama Lengkap / Instansi</label>
+                            <input type="text" id="reg-name" placeholder="Sesuai KTP / Akta">
+                        </div>
+                        <div class="space-y-1" id="nik-input-container">
+                            <label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Nomor NIK</label>
+                            <input type="text" inputmode="numeric" id="reg-nik" placeholder="16 Digit NIK KTP" maxlength="16">
+                        </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div><label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Email</label><input type="email" id="reg-email" placeholder="email@domain.com"></div>
-                        <div><label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Peran</label><select id="reg-role" onchange="window.handleRoleChange(this.value)"><option value="customer">Customer</option><option value="investor">Investor</option><option value="rekanan">Mitra / Rekanan</option><option value="admin">Admin</option></select></div>
-                    </div>
-
-                    <!-- TIER INPUT KHUSUS INVESTOR -->
-                    <div id="tier-input-container" class="hidden-el space-y-1 border-t border-slate-100 pt-4 mt-2">
-                        <label class="text-[10px] font-black text-indigo-600 uppercase px-2 block">Tier Investasi (Khusus Investor)</label>
-                        <select id="reg-tier" class="cursor-pointer border-indigo-200 focus:border-indigo-500 bg-indigo-50 text-indigo-900">
-                            <option value="">-- Pilih Nilai Investasi (Mandatori) --</option>
-                            <option value="A">Tier A - Rp 28.500.000</option>
-                            <option value="B">Tier B - Rp 22.500.000</option>
-                            <option value="C">Tier C - Rp 15.750.000</option>
-                            <option value="D">Tier D - Rp 13.750.000</option>
-                        </select>
-                    </div>
-
-                    <div><label class="text-[10px] font-black text-slate-400 uppercase px-2 block">WhatsApp</label><input type="number" id="reg-phone" placeholder="08xxxxxxxxxx"></div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 border-t border-slate-100 pt-4 mt-2">
-                        <div><label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Nama Bank</label><input type="text" id="reg-bank" placeholder="BCA / Mandiri"></div>
-                        <div><label class="text-[10px] font-black text-slate-400 uppercase px-2 block">No. Rekening</label><input type="number" id="reg-rek" placeholder="Nomor Akun"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Alamat Email</label>
+                            <input type="email" id="reg-email" placeholder="email@bisnis.com">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase px-2 block">No. HP / WhatsApp</label>
+                            <input type="number" id="reg-phone" placeholder="08xxxxxxxxxx">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 pt-4 mt-2">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Nama Bank</label>
+                            <input type="text" id="reg-bank" placeholder="Contoh: BCA / Mandiri">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Nomor Rekening</label>
+                            <input type="number" id="reg-rek" placeholder="Untuk transfer laba">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Buat Sandi</label>
+                            <input type="password" id="reg-password" placeholder="Min. 6 Karakter">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Peran / Akses</label>
+                            <select id="reg-role" onchange="window.handleRoleChange(this.value)" class="cursor-pointer">
+                                <option value="customer">Customer (Pemilik Unit)</option>
+                                <option value="investor">Investor (Pendana)</option>
+                                <option value="rekanan">Mitra / Rekanan (Sales/Teknisi)</option>
+                                <option value="admin">Admin Staf</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div id="admin-info-box" class="hidden-el space-y-1 bg-red-50 p-4 rounded-2xl border border-red-100">
                         <label class="text-[9px] font-black text-red-600 uppercase italic block">Verifikasi Staf Internal (Secret Key)</label>
                         <input type="password" id="reg-admin-key" placeholder="••••••••" class="bg-white w-full rounded-lg px-3 py-2 mt-1">
                     </div>
-
-                    <div><label class="text-[10px] font-black text-slate-400 uppercase px-2 block">Buat Sandi</label><input type="password" id="reg-password" placeholder="Min. 6 Karakter"></div>
-                    <button onclick="window.doRegister()" class="w-full bg-amber-500 text-slate-900 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-xl mt-4">Daftar Akun Baru</button>
+                    
+                    <button onclick="window.doRegister()" class="w-full bg-amber-500 text-slate-950 py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-xl mt-4">Selesaikan Pendaftaran</button>
                 </div>
-                <p class="mt-6 text-center text-xs font-bold text-slate-500">Sudah memiliki akun? <button onclick="window.showLogin()" class="text-indigo-600 underline">Kembali Login</button></p>
+                <div class="text-center pt-6 border-t border-slate-100 mt-6 text-center w-full">
+                    <p class="text-xs font-bold text-slate-500">
+                        Sudah punya akun? <button onclick="window.showLogin()" class="text-indigo-600 underline font-black ml-1">Kembali Login</button>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MAIN APP CONTENT -->
+    <!-- MAIN APP DASHBOARD -->
     <div id="app-content" class="hidden-el">
-        <aside id="main-sidebar" class="fixed left-0 top-0 h-full w-64 sidebar-gradient text-white p-6 no-print flex flex-col z-[100] transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
-            <div class="flex items-center gap-3 mb-10 shrink-0 text-left mt-2 lg:mt-0">
-                <div class="h-10 w-10 bg-indigo-500/20 border border-indigo-400/30 rounded flex items-center justify-center text-white shadow-sm"><i class="fas fa-bolt text-amber-400"></i></div>
-                <div class="text-left leading-none"><span class="block font-black text-sm tracking-tighter uppercase leading-none">KALIMAJA</span><span class="text-[8px] font-bold text-indigo-400 tracking-[0.2em] uppercase mt-1 block">SURYA ALAM</span></div>
+        <aside class="fixed left-0 top-0 h-full w-64 sidebar-gradient text-white p-6 no-print hidden lg:flex lg:flex-col z-50 text-left">
+            <div class="flex items-center gap-3 mb-10">
+                <div class="h-10 w-10 bg-indigo-500/20 border border-indigo-400/30 rounded-lg flex items-center justify-center text-white">
+                    <i class="fas fa-bolt text-amber-400"></i>
+                </div>
+                <div class="text-left leading-none">
+                    <span class="block font-black text-sm tracking-tighter uppercase leading-none">KALIMAJA</span>
+                    <span class="text-[8px] font-bold text-indigo-400 tracking-[0.2em] uppercase mt-1 block">SURYA ALAM</span>
+                </div>
             </div>
-            <nav class="space-y-2 flex-1 overflow-y-auto pb-4">
-                <button onclick="window.switchView('view-dashboard')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-sm font-bold border-l-4 border-amber-500 text-left text-white shadow-sm transition-all"><i class="fas fa-th-large w-5"></i> Dashboard Utama</button>
-                
-                <button onclick="window.sharePortal()" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl text-sm font-medium text-slate-300 hover:text-white text-left transition-all">
-                    <i class="fas fa-share-nodes w-5"></i> Bagikan Link Portal
-                </button>
 
-                <div id="admin-actions" class="hidden-el space-y-2 pt-4 border-t border-white/10 mt-4 text-left">
-                    <p class="text-[9px] font-bold text-slate-500 uppercase px-4 mb-2 italic tracking-widest">Admin Control</p>
-                    <button onclick="window.switchView('view-projects')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-sm font-bold transition-all text-left"><i class="fas fa-project-diagram w-5"></i> Daftar Proyek</button>
-                    <button onclick="window.switchView('view-customers')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-sm font-bold transition-all text-left"><i class="fas fa-users w-5"></i> Customer</button>
-                    <button onclick="window.switchView('view-investors')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-sm font-bold transition-all text-left"><i class="fas fa-user-tie w-5"></i> Investor</button>
-                    <button onclick="window.openNewProjectModal()" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-sm font-bold transition-all text-left"><i class="fas fa-plus-circle w-5"></i> Registrasi Proyek</button>
+            <nav class="space-y-6 flex-1 overflow-y-auto pr-2">
+                <div class="space-y-2 text-left">
+                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest px-2 italic">Akses Level: <span id="user-role-badge" class="text-amber-400">-</span></p>
                     
-                    <!-- BLOK ZONA BERBAHAYA (HAPUS DATA DIPISAHKAN DARI LOGOUT) -->
-                    <div class="pt-6 mt-6 border-t border-red-500/20 text-left">
-                        <p class="text-[9px] font-bold text-red-500/70 uppercase tracking-widest px-2 italic mb-2">Zona Berbahaya</p>
-                        <button onclick="window.clearAllData()" class="w-full flex items-center gap-3 px-4 py-3 bg-red-950/40 hover:bg-red-600 rounded-xl text-[10px] font-black text-red-400 hover:text-white border border-red-900 transition-all text-left uppercase tracking-widest"><i class="fas fa-trash-can w-5"></i> Hapus Database</button>
+                    <button onclick="window.switchView('dashboard')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-sm font-bold border-l-4 border-amber-500 text-left text-white shadow-sm transition-all">
+                        <i class="fas fa-th-large w-5"></i> Dashboard Utama
+                    </button>
+
+                    <!-- PUSAT PESAN (DAPAT DIAKSES SEMUA ROLE) -->
+                    <button onclick="window.openChatView()" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl text-sm font-medium text-slate-300 hover:text-white text-left transition-all">
+                        <i class="fas fa-comments w-5"></i> Pusat Pesan
+                    </button>
+                    
+                    <!-- MENU ADMIN -->
+                    <div id="admin-actions" class="hidden-el space-y-2 pt-2">
+                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest px-2 italic mt-4 mb-2">Administrasi Data</p>
+                        <button onclick="window.switchView('projects')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl text-sm font-medium text-slate-300 hover:text-white text-left transition-all">
+                            <i class="fas fa-project-diagram w-5"></i> Daftar Proyek
+                        </button>
+                        <button onclick="window.switchView('customers')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl text-sm font-medium text-slate-300 hover:text-white text-left transition-all">
+                            <i class="fas fa-users w-5"></i> Daftar Customer
+                        </button>
+                        <button onclick="window.switchView('investors')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl text-sm font-medium text-slate-300 hover:text-white text-left transition-all">
+                            <i class="fas fa-user-tie w-5"></i> Daftar Investor
+                        </button>
+                        <button onclick="window.switchView('rekanan')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl text-sm font-medium text-slate-300 hover:text-white text-left transition-all">
+                            <i class="fas fa-handshake w-5"></i> Daftar Rekanan
+                        </button>
+                        
+                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest px-2 italic mt-4 mb-2">Manajemen Proyek</p>
+                        <button onclick="window.openNewProjectModal()" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl text-sm font-medium text-slate-300 hover:text-white text-left transition-all">
+                            <i class="fas fa-plus-circle w-5"></i> Registrasi Kontrak
+                        </button>
+                        <button onclick="window.openKwhModal()" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl text-sm font-medium text-slate-300 hover:text-white text-left transition-all">
+                            <i class="fas fa-microchip w-5"></i> Input kWh Real
+                        </button>
+
+                        <div class="pt-6 mt-6 border-t border-red-500/20 text-left">
+                            <p class="text-[9px] font-bold text-red-500/70 uppercase tracking-widest px-2 italic mb-2">Zona Berbahaya</p>
+                            <button onclick="window.clearAllData()" class="w-full flex items-center gap-3 px-4 py-3 bg-red-950/40 hover:bg-red-600 rounded-xl text-[10px] font-black text-red-400 hover:text-white border border-red-900 transition-all text-left uppercase tracking-widest">
+                                <i class="fas fa-trash w-5"></i> Hapus Database
+                            </button>
+                        </div>
                     </div>
                 </div>
             </nav>
-            <!-- BLOK KELUAR SISTEM -->
             <div class="pt-6 border-t border-white/10 shrink-0 text-left">
-                <button onclick="window.doLogout()" class="w-full flex items-center gap-3 px-4 py-3 bg-slate-800/50 hover:bg-slate-700 rounded-xl text-sm font-bold transition-all text-left border border-slate-700 text-slate-200"><i class="fas fa-sign-out-alt w-5"></i> Keluar Sistem</button>
+                <button onclick="window.doLogout()" class="w-full flex items-center gap-3 px-4 py-3 bg-slate-800/50 hover:bg-slate-700 rounded-xl text-sm font-bold text-red-400 transition-all text-left border border-slate-700 text-slate-200">
+                    <i class="fas fa-sign-out-alt w-5 text-slate-400"></i> Keluar Sistem
+                </button>
             </div>
         </aside>
 
-        <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/60 z-[90] hidden-el lg:hidden" onclick="window.toggleSidebar()"></div>
+        <!-- MAIN WORKSPACE -->
+        <main class="lg:ml-64 p-6 lg:p-10">
+            <header class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left">
+                <div>
+                    <h1 class="text-3xl font-black italic uppercase tracking-tighter text-slate-950 leading-none">Management <span class="text-indigo-600">Overview</span></h1>
+                    <p class="text-sm font-medium text-slate-400 italic mt-2 text-left">Portal Informasi & Transaksi Finansial</p>
+                </div>
+            </header>
 
-        <main class="lg:ml-64 p-6 lg:p-10 text-left">
-            <div class="lg:hidden flex justify-between items-center mb-8 bg-white p-4 rounded-2xl shadow-sm">
-                <span class="font-black text-indigo-900 uppercase">Portal Kalimaja</span>
-                <button onclick="window.toggleSidebar()" class="h-10 w-10 bg-slate-50 shadow rounded-lg flex items-center justify-center text-slate-600"><i class="fas fa-bars"></i></button>
-            </div>
-
-            <!-- Header User Profile -->
-            <div class="bg-white rounded-[2rem] p-8 card-shadow border border-slate-100 mb-8 flex flex-col md:flex-row justify-between items-center gap-8 text-left relative overflow-hidden">
-                <div class="flex items-center gap-6 z-10">
-                    <div class="h-16 w-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-3xl border-2 border-white shadow-inner"><i class="fas fa-user-circle"></i></div>
+            <!-- PROFIL PENGGUNA -->
+            <div class="bg-white rounded-[32px] p-8 card-shadow border border-slate-100 mb-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 text-left">
+                <div class="flex items-center gap-6">
+                    <div class="h-20 w-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-3xl shadow-inner border-4 border-white">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
                     <div>
-                        <h3 id="profile-name" class="text-xl font-black uppercase text-slate-900 leading-none">-</h3>
+                        <h3 id="profile-name" class="text-2xl font-black italic uppercase text-slate-900 leading-none">-</h3>
                         <p id="profile-role" class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-2">-</p>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 border-l border-slate-50 pl-8 items-center">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 w-full lg:w-auto border-t lg:border-t-0 lg:border-l border-slate-100 pt-6 lg:pt-0 lg:pl-8 items-center">
                     <div><p class="text-[9px] font-black text-slate-400 uppercase mb-1">NIK</p><p id="profile-nik" class="text-xs font-bold text-slate-800 mono">-</p></div>
-                    <div><p class="text-[9px] font-black text-slate-400 uppercase mb-1">WhatsApp</p><p id="profile-phone" class="text-xs font-bold text-slate-800 mono">-</p></div>
-                    <div><p class="text-[9px] font-black text-slate-400 uppercase mb-1">Bank</p><p id="profile-bank" class="text-xs font-bold text-indigo-900 uppercase">-</p></div>
+                    <div><p class="text-[9px] font-black text-slate-400 uppercase mb-1">No. HP/WA</p><p id="profile-phone" class="text-xs font-bold text-slate-800 mono">-</p></div>
+                    <div><p class="text-[9px] font-black text-slate-400 uppercase mb-1">Nama Bank</p><p id="profile-bank" class="text-xs font-bold text-indigo-900 uppercase">-</p></div>
                     <div class="flex justify-between items-center gap-4">
                         <div><p class="text-[9px] font-black text-slate-400 uppercase mb-1">No. Rekening</p><p id="profile-rek" class="text-xs font-bold text-indigo-900 mono">-</p></div>
-                        <button onclick="window.openEditBankModal()" class="h-8 w-8 bg-slate-50 hover:bg-indigo-100 text-slate-400 hover:text-indigo-600 rounded-lg flex items-center justify-center transition-colors shrink-0" title="Ubah Rekening"><i class="fas fa-pencil-alt text-xs"></i></button>
+                        <button onclick="window.openEditBankModal()" class="h-8 w-8 bg-slate-50 hover:bg-indigo-100 text-slate-400 hover:text-indigo-600 rounded-lg flex items-center justify-center transition-colors shrink-0" title="Ubah Rekening">
+                            <i class="fas fa-pencil-alt text-xs"></i>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Dashboard Content -->
+            <!-- PUSAT PESAN / CHAT MENU -->
+            <div id="view-chat" class="hidden-el h-[calc(100vh-14rem)] flex flex-col md:flex-row gap-6 text-left">
+                <div id="chat-contacts" class="w-full md:w-1/3 bg-white rounded-[32px] p-6 card-shadow border border-slate-100 flex flex-col hidden-el">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-black italic uppercase tracking-tight text-indigo-950">Buku Kontak</h3>
+                        <i class="fas fa-address-book text-slate-300"></i>
+                    </div>
+                    <div id="contact-list" class="space-y-2 overflow-y-auto flex-1 pr-2"></div>
+                </div>
+                <div class="flex-1 bg-white rounded-[32px] card-shadow border border-slate-100 flex flex-col overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 bg-slate-50/80 flex items-center gap-4">
+                        <div class="h-12 w-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl shadow-inner border-2 border-white"><i class="fas fa-headset"></i></div>
+                        <div>
+                            <h4 id="chat-active-name" class="font-black uppercase text-slate-900 leading-tight">Memuat Kontak...</h4>
+                            <p id="chat-active-role" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">-</p>
+                        </div>
+                    </div>
+                    <div id="chat-messages" class="flex-1 p-6 overflow-y-auto bg-slate-50/30 space-y-4"></div>
+                    <div class="p-4 border-t border-slate-100 bg-white flex gap-3 items-center">
+                        <input type="text" id="chat-input" placeholder="Tuliskan pesan Anda..." class="flex-1 bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-medium outline-none focus:border-indigo-400 transition-all" onkeypress="if(event.key === 'Enter') window.sendChatMessage()">
+                        <button onclick="window.sendChatMessage()" class="bg-indigo-600 hover:bg-indigo-800 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md">Kirim</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAMPILAN DASHBOARD UTAMA -->
             <div id="view-dashboard">
+                
+                <!-- DASHBOARD KHUSUS MITRA / REKANAN -->
                 <div id="rekanan-dashboard-section" class="hidden-el space-y-6 text-left mb-10">
                     <div class="flex items-center gap-3 mb-6">
-                        <div class="h-10 w-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-lg"><i class="fas fa-handshake"></i></div>
+                        <div class="h-10 w-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-lg">
+                            <i class="fas fa-handshake"></i>
+                        </div>
                         <div>
                             <h3 class="font-black italic uppercase tracking-tight text-slate-900 text-xl leading-none">Dashboard Kemitraan</h3>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Ringkasan Pendapatan Rekanan</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Ringkasan Kinerja & Komisi Penjualan / Teknisi</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
                         <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col justify-between">
-                            <span class="text-[10px] font-bold px-3 py-1 bg-slate-100 text-slate-600 rounded-lg uppercase tracking-widest w-fit">Klien Saya</span>
+                            <span class="text-[10px] font-bold px-3 py-1 bg-slate-100 text-slate-600 rounded-lg uppercase tracking-widest w-fit">Klien Terhubung</span>
                             <p class="text-3xl font-black text-indigo-900 mt-4" id="rek-total-klien">0</p>
                         </div>
                         <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col justify-between">
-                            <span class="text-[10px] font-bold px-3 py-1 bg-slate-100 text-slate-600 rounded-lg uppercase tracking-widest w-fit">Populasi AC</span>
+                            <span class="text-[10px] font-bold px-3 py-1 bg-slate-100 text-slate-600 rounded-lg uppercase tracking-widest w-fit">AC Terpasang</span>
                             <p class="text-3xl font-black text-indigo-900 mt-4" id="rek-total-unit">0</p>
                         </div>
                         <div class="bg-emerald-950 p-6 rounded-[2rem] shadow-xl text-white flex flex-col justify-between border-b-4 border-emerald-400">
                             <span class="text-[10px] font-bold px-3 py-1 bg-white/10 text-emerald-200 rounded-lg uppercase tracking-widest w-fit">Jasa Pemasangan</span>
                             <p class="text-2xl font-black text-emerald-400 mt-4 mono" id="rek-total-jasa">Rp 0</p>
-                            <p class="text-[9px] text-emerald-500/70 mt-1 italic uppercase tracking-widest">Sekali Bayar (Selesai)</p>
+                            <p class="text-[9px] text-emerald-500/70 mt-1 italic uppercase tracking-widest">Sekali Bayar</p>
                         </div>
                         <div class="bg-indigo-950 p-6 rounded-[2rem] shadow-xl text-white flex flex-col justify-between border-b-4 border-indigo-400">
-                            <span class="text-[10px] font-bold px-3 py-1 bg-white/10 text-indigo-200 rounded-lg uppercase tracking-widest w-fit">Komisi Sales</span>
+                            <span class="text-[10px] font-bold px-3 py-1 bg-white/10 text-indigo-200 rounded-lg uppercase tracking-widest w-fit">Akumulasi Komisi</span>
                             <p class="text-2xl font-black text-amber-400 mt-4 mono" id="rek-total-komisi">Rp 0</p>
-                            <p class="text-[9px] text-indigo-400/70 mt-1 italic uppercase tracking-widest">Bagi Hasil Bulanan</p>
+                            <p class="text-[9px] text-indigo-400/70 mt-1 italic uppercase tracking-widest">Bagi Hasil Rutin</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- LIST PORTOFOLIO INVESTOR -->
+                <!-- LIST PORTOFOLIO INVESTOR (HANYA INVESTOR) -->
                 <div id="investor-portfolio-section" class="hidden-el mb-10 text-left">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="h-10 w-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-lg">
@@ -340,9 +422,12 @@
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Pilih kartu proyek untuk melihat performa detail</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="investor-portfolio-grid"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="investor-portfolio-grid">
+                        <!-- Disuntikkan via JS -->
+                    </div>
                 </div>
 
+                <!-- PANEL MULTI-PROYEK -->
                 <div id="project-controls" class="hidden-el bg-white rounded-[32px] p-6 mb-8 card-shadow border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div>
                         <p id="selector-subtitle" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Control Panel</p>
@@ -350,22 +435,27 @@
                     </div>
                     <div class="w-full md:w-1/2 flex items-center gap-2">
                         <select id="proj-select" onchange="window.changeActiveProject(this.value)" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold outline-none cursor-pointer focus:border-indigo-500 transition-all"></select>
+                        <button id="btn-delete-proj" onclick="window.deleteActiveProject()" class="hidden-el shrink-0 bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-200 hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Batalkan / Hapus Proyek">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>
                 </div>
 
+                <!-- PESAN KOSONG -->
                 <div id="empty-msg" class="bg-white rounded-[40px] p-20 text-center card-shadow border border-slate-100 hidden-el">
                     <i class="fas fa-search text-6xl text-slate-200 mb-6 block mx-auto"></i>
                     <h3 id="empty-msg-title" class="text-xl font-bold uppercase italic text-slate-900">Belum Ada Proyek Aktif</h3>
                     <p id="empty-msg-desc" class="text-slate-400 text-sm mt-2 max-w-sm mx-auto">Sistem sedang menunggu Admin PT. Kalimaja untuk menghubungkan email Anda dengan data proyek yang berjalan.</p>
                 </div>
 
+                <!-- DASHBOARD PROYEK VIEW -->
                 <div id="dash-view" class="space-y-10 hidden-el">
                     <!-- INFO PROYEK UTAMA -->
                     <div class="grid lg:grid-cols-3 gap-8 text-left">
                         <div class="lg:col-span-2 bg-white rounded-[32px] p-8 card-shadow border border-slate-100 relative overflow-hidden">
                             <div class="mb-8">
                                 <span class="status-pill bg-emerald-100 text-emerald-700 mb-2 inline-block">Verified Active Project</span>
-                                <h2 id="view-loc-name" class="text-3xl font-black italic uppercase text-slate-900 leading-none mb-1">-</h2>
+                                <h2 id="view-loc-name" class="text-2xl font-black italic uppercase text-slate-900 leading-none mb-1">-</h2>
                                 <p id="view-cust-email" class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">-</p>
                             </div>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6 border-t border-slate-50">
@@ -447,7 +537,9 @@
                             <span id="breakdown-period-badge" class="text-[10px] font-bold px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full uppercase tracking-widest">Periode Terakhir</span>
                         </div>
                         <div class="p-8">
-                            <div id="breakdown-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+                            <div id="breakdown-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                <!-- Disuntikkan via JS -->
+                            </div>
                             <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                                 <span class="text-xs font-black text-slate-500 uppercase tracking-widest text-center md:text-left">Total Konsumsi Kalkulasi</span>
                                 <span id="breakdown-total" class="text-3xl font-black text-indigo-950">0 kWh</span>
@@ -482,7 +574,7 @@
             <!-- TAMPILAN DAFTAR PROYEK (HANYA ADMIN) -->
             <div id="view-projects" class="hidden-el space-y-8 text-left font-bold text-slate-950">
                 <div class="bg-white rounded-[40px] card-shadow border border-slate-100 overflow-hidden text-left">
-                    <div class="p-8 border-b border-slate-100 bg-blue-50/50 flex justify-between items-center bg-blue-50">
+                    <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-blue-50/50">
                         <h3 class="font-black italic uppercase tracking-tight text-blue-900">
                             <i class="fas fa-project-diagram mr-2 text-blue-600"></i> Database Proyek Aktif
                         </h3>
@@ -497,9 +589,12 @@
                                     <th class="py-5 px-6 text-left">Investor</th>
                                     <th class="py-5 px-6 text-right">Total Unit</th>
                                     <th class="py-5 px-6 text-right">Nilai CAPEX</th>
+                                    <th class="py-5 px-6 text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-projects-body" class="divide-y divide-slate-100"></tbody>
+                            <tbody id="table-projects-body" class="divide-y divide-slate-100">
+                                <!-- Data diinjeksi via JS -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -526,7 +621,9 @@
                                     <th class="py-5 px-6 text-left">Proyek Terhubung</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-customers-body" class="divide-y divide-slate-100"></tbody>
+                            <tbody id="table-customers-body" class="divide-y divide-slate-100">
+                                <!-- Data diinjeksi via JS -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -550,10 +647,12 @@
                                     <th class="py-5 px-6 text-left">NIK KTP</th>
                                     <th class="py-5 px-6 text-left">No. HP / WA</th>
                                     <th class="py-5 px-6 text-left">Data Rekening</th>
-                                    <th class="py-5 px-6 text-center text-amber-600">Tier / Kelas</th>
+                                    <th class="py-5 px-6 text-left">Proyek Didanai</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-investors-body" class="divide-y divide-slate-100"></tbody>
+                            <tbody id="table-investors-body" class="divide-y divide-slate-100">
+                                <!-- Data diinjeksi via JS -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -577,10 +676,12 @@
                                     <th class="py-5 px-6 text-left">NIK KTP</th>
                                     <th class="py-5 px-6 text-left">No. HP / WA</th>
                                     <th class="py-5 px-6 text-left">Data Rekening</th>
-                                    <th class="py-5 px-6 text-center text-amber-600">Sertifikasi Teknisi</th>
+                                    <th class="py-5 px-6 text-left">Status Proyek</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-rekanan-body" class="divide-y divide-slate-100"></tbody>
+                            <tbody id="table-rekanan-body" class="divide-y divide-slate-100">
+                                <!-- Data diinjeksi via JS -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -594,7 +695,7 @@
         <div class="modal-container max-w-md">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 class="font-black italic uppercase tracking-tight text-indigo-950">Ubah Data Rekening</h3>
-                <button onclick="window.uiModal('bank-modal', false)" class="text-slate-400 hover:text-slate-900"><i class="fas fa-times"></i></button>
+                <button onclick="uiModal('bank-modal', false)" class="text-slate-400 hover:text-slate-900"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-6 space-y-4">
                 <div class="space-y-1">
@@ -617,18 +718,22 @@
         <div class="modal-container">
             <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 id="project-modal-title" class="font-black italic uppercase tracking-tight text-indigo-950">Setup Kontrak Baru</h3>
-                <button onclick="window.uiModal('project-modal', false)" class="text-slate-400 hover:text-slate-900"><i class="fas fa-times"></i></button>
+                <button onclick="uiModal('project-modal', false)" class="text-slate-400 hover:text-slate-900"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-10 overflow-y-auto space-y-8 text-left">
                 <!-- Data Pihak Utama -->
                 <div class="grid md:grid-cols-2 gap-6 text-left">
                     <div class="space-y-1">
                         <label class="text-[10px] font-black text-slate-400 uppercase px-2">Akun Customer Terdaftar</label>
-                        <select id="form-cust-email" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 font-bold outline-none cursor-pointer focus:border-indigo-500"></select>
+                        <select id="form-cust-email" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 font-bold outline-none cursor-pointer focus:border-indigo-500">
+                            <option value="">-- Menunggu Data --</option>
+                        </select>
                     </div>
                     <div class="space-y-1 text-left">
                         <label class="text-[10px] font-black text-slate-400 uppercase px-2">Akun Investor Terdaftar</label>
-                        <select id="form-inv-email" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 font-bold outline-none cursor-pointer focus:border-indigo-500"></select>
+                        <select id="form-inv-email" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 font-bold outline-none cursor-pointer focus:border-indigo-500">
+                            <option value="">-- Menunggu Data --</option>
+                        </select>
                     </div>
                 </div>
 
@@ -636,15 +741,21 @@
                 <div class="grid md:grid-cols-3 gap-6 text-left border-t border-slate-100 pt-6">
                     <div class="space-y-1 text-left">
                         <label class="text-[10px] font-black text-amber-500 uppercase px-2">Rekanan (Sales Customer)</label>
-                        <select id="form-rek-cust" class="w-full bg-amber-50 border-2 border-amber-100 rounded-2xl px-4 py-4 font-bold outline-none cursor-pointer focus:border-amber-500 text-sm"></select>
+                        <select id="form-rek-cust" class="w-full bg-amber-50 border-2 border-amber-100 rounded-2xl px-4 py-4 font-bold outline-none cursor-pointer focus:border-amber-500 text-sm">
+                            <option value="">-- Tidak Ada --</option>
+                        </select>
                     </div>
                     <div class="space-y-1 text-left">
                         <label class="text-[10px] font-black text-amber-500 uppercase px-2">Rekanan (Sales Investor)</label>
-                        <select id="form-rek-inv" class="w-full bg-amber-50 border-2 border-amber-100 rounded-2xl px-4 py-4 font-bold outline-none cursor-pointer focus:border-amber-500 text-sm"></select>
+                        <select id="form-rek-inv" class="w-full bg-amber-50 border-2 border-amber-100 rounded-2xl px-4 py-4 font-bold outline-none cursor-pointer focus:border-amber-500 text-sm">
+                            <option value="">-- Tidak Ada --</option>
+                        </select>
                     </div>
                     <div class="space-y-1 text-left">
                         <label class="text-[10px] font-black text-indigo-500 uppercase px-2">Teknisi Pemasangan</label>
-                        <select id="form-rek-tek" class="w-full bg-indigo-50 border-2 border-indigo-100 rounded-2xl px-4 py-4 font-bold outline-none cursor-pointer focus:border-indigo-500 text-sm"></select>
+                        <select id="form-rek-tek" class="w-full bg-indigo-50 border-2 border-indigo-100 rounded-2xl px-4 py-4 font-bold outline-none cursor-pointer focus:border-indigo-500 text-sm">
+                            <option value="">-- Tidak Ada --</option>
+                        </select>
                     </div>
                 </div>
 
@@ -684,7 +795,7 @@
         <div class="modal-container">
             <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 id="kwh-modal-title" class="font-black italic uppercase tracking-tight text-indigo-950 text-left">Input Realisasi per Unit</h3>
-                <button onclick="window.uiModal('kwh-modal', false)" class="text-slate-400 hover:text-slate-900"><i class="fas fa-times"></i></button>
+                <button onclick="uiModal('kwh-modal', false)" class="text-slate-400 hover:text-slate-900"><i class="fas fa-times"></i></button>
             </div>
             
             <div class="p-8 space-y-6 overflow-y-auto flex-1">
@@ -695,7 +806,9 @@
                 
                 <div class="pt-2">
                     <label class="text-[10px] font-black text-indigo-500 uppercase px-2 mb-3 block">Input kWh Meter Masing-Masing Unit</label>
-                    <div id="kwh-inputs-container" class="space-y-3"></div>
+                    <div id="kwh-inputs-container" class="space-y-3">
+                        <!-- Disuntikkan via JS -->
+                    </div>
                 </div>
             </div>
 
@@ -709,13 +822,82 @@
         </div>
     </div>
 
-    <!-- FIREBASE MODULE & GLOBAL FUNCTIONS -->
+    <!-- TEMPLATE CETAK INVOICE (TERSEMBUNYI KECUALI SAAT PRINT) -->
+    <div id="invoice-print-template" class="p-8 max-w-4xl mx-auto bg-white text-slate-900">
+        <div class="border-b-4 border-indigo-950 pb-6 mb-8 flex justify-between items-end">
+            <div>
+                <h1 class="text-4xl font-black italic uppercase tracking-tighter text-indigo-950 leading-none">KALIMAJA AIRTRON</h1>
+                <p class="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] mt-2">PT Kalimaja Surya Alam</p>
+                <p class="text-xs text-slate-500 mt-1">Tangerang, Banten, Indonesia</p>
+            </div>
+            <div class="text-right">
+                <h2 class="text-3xl font-black text-slate-800 uppercase tracking-widest mb-2">INVOICE TAGIHAN</h2>
+                <p class="text-sm font-bold text-slate-600" id="inv-date">Tanggal: -</p>
+                <p class="text-sm font-bold text-slate-600">No: <span id="inv-number" class="mono text-indigo-700">-</span></p>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-start mb-10">
+            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 min-w-[300px]">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Ditagihkan Kepada:</p>
+                <p class="text-xl font-black text-slate-800 uppercase mb-1" id="inv-cust-name">-</p>
+                <p class="text-sm font-bold text-slate-600 uppercase" id="inv-cust-loc"><i class="fas fa-map-marker-alt mr-1"></i> -</p>
+            </div>
+            <div class="text-right p-6">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Periode Konsumsi & Bagi Hasil:</p>
+                <p class="text-2xl font-black text-indigo-600 uppercase italic border-b-2 border-indigo-200 inline-block pb-1" id="inv-period">-</p>
+            </div>
+        </div>
+
+        <table class="w-full text-left border-collapse mb-10">
+            <thead class="bg-indigo-950 text-white">
+                <tr>
+                    <th class="py-4 px-6 text-xs font-bold uppercase tracking-widest rounded-tl-xl">Keterangan / Parameter</th>
+                    <th class="py-4 px-6 text-xs font-bold uppercase tracking-widest text-right rounded-tr-xl">Nilai (IDR)</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 border border-slate-200">
+                <tr>
+                    <td class="py-5 px-6 text-sm font-bold text-slate-500 italic">Estimasi Tagihan Listrik Normal (Tanpa Airtron)</td>
+                    <td class="py-5 px-6 text-right text-sm font-bold text-slate-400 line-through decoration-red-400 mono" id="inv-val-normal">-</td>
+                </tr>
+                <tr>
+                    <td class="py-5 px-6 text-sm font-bold text-slate-700">Tagihan Aktual Listrik PLN (Terakhir)</td>
+                    <td class="py-5 px-6 text-right text-sm font-black text-slate-800 mono" id="inv-val-actual">-</td>
+                </tr>
+                <tr class="bg-emerald-50/50">
+                    <td class="py-5 px-6 text-sm font-black text-emerald-700 uppercase">Gross Saving (Realisasi Penghematan)</td>
+                    <td class="py-5 px-6 text-right text-base font-black text-emerald-600 mono" id="inv-val-saving">-</td>
+                </tr>
+                <tr class="bg-indigo-50 border-t-2 border-indigo-200">
+                    <td id="inv-label-total" class="py-6 px-6 text-base font-black text-indigo-950 uppercase tracking-widest">Total Tagihan Bagi Hasil</td>
+                    <td class="py-6 px-6 text-right text-2xl font-black text-indigo-700 mono" id="inv-val-total">-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="border-t-2 border-dashed border-slate-200 pt-8 flex justify-between items-start mt-10">
+            <div class="bg-amber-50 p-6 rounded-2xl border border-amber-100 max-w-sm">
+                <p class="text-[10px] font-black text-amber-700 uppercase tracking-widest mb-3"><i class="fas fa-info-circle mr-1"></i> Instruksi Pembayaran:</p>
+                <p class="text-sm font-bold text-slate-800 uppercase mb-1" id="inv-bank-name">-</p>
+                <p class="text-xl font-black text-indigo-950 mono tracking-widest mb-1" id="inv-bank-rek">-</p>
+                <p class="text-xs font-bold text-slate-600 uppercase" id="inv-bank-owner">A.n -</p>
+            </div>
+            <div class="text-center pt-4">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-16">Hormat Kami,</p>
+                <p class="text-sm font-black text-slate-800 uppercase border-b border-slate-800 pb-1 inline-block">PT KALIMAJA SURYA ALAM</p>
+                <p class="text-xs text-slate-500 font-bold mt-1">Divisi Kemitraan & Keuangan</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CONFIG (Mengutamakan env Firebase untuk GitHub/Canvas)
+        // MENGGUNAKAN ENVIRONMENT JIKA ADA
         const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const firebaseConfig = envConfig || {
             apiKey: "AIzaSy" + "Bnvway6x7QTxv4" + "kup7lW5TEKNwkocRdL4",
@@ -731,21 +913,26 @@
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        // Helper path Firestore (Rule 1 Strict Paths)
+        // PATH STRATEGY CLOUD FIREBASE
         const getPubPath = (col) => collection(db, 'artifacts', appId, 'public', 'data', col);
         const getPubDoc = (col, id) => doc(db, 'artifacts', appId, 'public', 'data', col, id);
 
-        window.dbUsers = []; window.dbProjects = []; window.dbLogs = [];
+        window.dbUsers = []; window.dbProjects = []; window.dbLogs = []; window.dbChats = [];
         window.activeUser = null; window.activeProject = null;
-        let isReady = { users: false, projs: false, logs: false };
+        window.activeChatContact = null; window.currentAttachment = null; 
+        window.editingProjectId = null; window.editingLogId = null;
+        
+        let isReady = { users: false, projs: false, logs: false, chats: false };
 
         const formatIDR = (v) => new Intl.NumberFormat('id-ID', {style:'currency', currency:'IDR', maximumFractionDigits:0}).format(v || 0);
         const formatNum = (v) => new Intl.NumberFormat('id-ID').format(v || 0);
-        const setUI = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+        const setUI = (id, val) => { const el = document.getElementById(id); if(el) el.innerHTML = val; };
+        
         const PRICES = { 0.5:2500000, 0.75:2600000, 1:2750000, 1.5:2750000, 2:3150000, 2.5:3150000, 3:3150000, 3.5:4450000, 4:4450000, 4.5:4450000, 5:5700000, 6:5700000, 7:5700000, 8:6500000, 10:8500000, 12:10500000, 15:12500000, 18:14500000, 20:16500000 };
         const WATTS = { 0.5:420, 0.75:630, 1:840, 1.5:1260, 2:1680, 2.5:2100, 3:2520, 3.5:2940, 4:3360, 4.5:3780, 5:4200, 6:5040, 7:5880, 8:6720, 10:8400, 12:10080, 15:12600, 18:15120, 20:16800 };
+        const TARIF_PLN = 1615;
 
-        // --- DEFINE GLOBAL FUNCTIONS INSIDE MODULE (MENCEGAH ERROR TDK TERDEFINISI) ---
+        // --- CORE UI FUNCTIONS ---
         window.autoRefreshUI = function() {
             if(!window.activeUser) return;
             const vn = window.currentViewName;
@@ -754,6 +941,10 @@
             else if(vn === 'view-customers') window.renderUserTable('customer');
             else if(vn === 'view-investors') window.renderUserTable('investor');
             else if(vn === 'view-rekanan') window.renderUserTable('rekanan');
+            else if(vn === 'view-chat') {
+                if (window.activeUser.role === 'admin') window.renderChatContacts(true);
+                window.renderChatMessages();
+            }
         };
 
         window.loadDashboard = function() {
@@ -761,16 +952,18 @@
             document.getElementById('auth-screen').classList.add('hidden-el');
             document.getElementById('app-content').classList.remove('hidden-el');
             
-            let roleDisplay = (u.role || "").toUpperCase();
-            if(u.role === 'investor' && u.tier) {
-                roleDisplay += ` (TIER ${u.tier})`;
-            }
-
-            setUI('user-role-badge', roleDisplay);
+            setUI('user-role-badge', (u.role || "").toUpperCase());
             setUI('profile-name', u.name || "User"); 
-            setUI('profile-role', "Akses: " + roleDisplay);
             setUI('profile-nik', u.nik || "-");
             setUI('profile-phone', u.phone || "-");
+
+            const profileImg = document.getElementById('profile-image');
+            const defaultIcon = document.getElementById('profile-default-icon');
+            if (u.avatar) {
+                profileImg.src = u.avatar; profileImg.classList.remove('hidden-el'); defaultIcon.classList.add('hidden-el');
+            } else {
+                profileImg.src = ''; profileImg.classList.add('hidden-el'); defaultIcon.classList.remove('hidden-el');
+            }
 
             if(u.role === 'admin') {
                 const el = document.getElementById('admin-actions');
@@ -788,6 +981,13 @@
                 myRekProjs.forEach(p => {
                     if(p.rekTekEmail === u.email) totalJasa += (p.jasaTeknisi || 0);
                     totalUnit += (p.units ? p.units.reduce((a,b)=>a+b.q, 0) : 0);
+                    const pLogs = window.dbLogs.filter(l => l.projectId === p.id);
+                    pLogs.forEach(l => {
+                        const saving = Math.max(0, (p.baseline - l.kwhReal) * 1615);
+                        const companyProfit = (saving * 0.7) * 0.3; 
+                        if(p.rekCustEmail === u.email) totalKomisi += companyProfit * 0.25;
+                        if(p.rekInvEmail === u.email) totalKomisi += companyProfit * 0.15;
+                    });
                 });
                 setUI('rek-total-klien', myRekProjs.length); setUI('rek-total-unit', totalUnit);
                 setUI('rek-total-jasa', formatIDR(totalJasa)); setUI('rek-total-komisi', formatIDR(totalKomisi));
@@ -823,7 +1023,7 @@
         window.renderProjectTable = function() {
             const tbody = document.getElementById('table-projects-body'); if(!tbody) return; tbody.innerHTML = '';
             window.dbProjects.forEach((p, index) => {
-                tbody.insertAdjacentHTML('beforeend', `<tr class="text-xs border-b hover:bg-slate-50"><td class="py-5 px-6 font-bold text-slate-400">${index+1}</td><td class="py-5 px-6 font-black text-indigo-900 uppercase">${p.location}<br><span class="text-[9px] font-mono text-slate-400">${p.id}</span></td><td class="py-5 px-6 text-slate-600 italic">${p.custEmail}</td><td class="py-5 px-6 text-slate-600 italic">${p.invEmail}</td><td class="py-5 px-6 text-right font-bold text-indigo-600">${p.units ? p.units.reduce((a,b)=>a+b.q,0) : 0} Unit</td><td class="py-5 px-6 text-right font-black text-slate-800 mono">${formatIDR(p.capex)}</td><td class="py-5 px-6 text-center whitespace-nowrap"><button onclick="window.goToProjectFromAdmin('${p.id}')" class="px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-[9px] font-black uppercase"><i class="fas fa-eye"></i> Detail</button></td></tr>`);
+                tbody.insertAdjacentHTML('beforeend', `<tr class="text-xs border-b hover:bg-slate-50"><td class="py-5 px-6 font-bold text-slate-400">${index+1}</td><td class="py-5 px-6 font-black text-indigo-900 uppercase">${p.location}<br><span class="text-[9px] font-mono text-slate-400">${p.id}</span></td><td class="py-5 px-6 text-slate-600 italic">${p.custEmail}</td><td class="py-5 px-6 text-right font-black text-slate-800 mono">${formatIDR(p.capex)}</td><td class="py-5 px-6 text-center"><button onclick="window.goToProjectFromAdmin('${p.id}')" class="px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-[9px] font-black uppercase"><i class="fas fa-eye"></i> Detail</button></td></tr>`);
             });
         };
 
@@ -844,15 +1044,9 @@
                 else if (roleType === 'rekanan') userProjs = window.dbProjects.filter(p => p.rekCustEmail === u.email || p.rekInvEmail === u.email || p.rekTekEmail === u.email);
 
                 let projectHtml = userProjs.length > 0 ? userProjs.map(p => `<button onclick="window.goToProjectFromAdmin('${p.id}')" class="block w-full text-left mb-1 px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors truncate"><i class="fas fa-external-link-alt mr-1"></i> ${p.location}</button>`).join('') : '-';
+                const avatarHtml = u.avatar ? `<img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover shrink-0">` : `<div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0"><i class="fas fa-user"></i></div>`;
                 
-                let extraCol = '';
-                if(roleType === 'investor') {
-                    extraCol = `<td class="py-5 px-6 font-black text-amber-600 uppercase text-center">${u.tier ? 'TIER ' + u.tier : '-'}</td>`;
-                } else if(roleType === 'rekanan') {
-                    extraCol = `<td class="py-5 px-6 text-center"><button class="bg-slate-100 text-slate-300 h-8 w-8 rounded-full shadow-sm flex items-center justify-center text-xs mx-auto border"><i class="fas fa-star"></i></button></td>`;
-                }
-
-                tbody.insertAdjacentHTML('beforeend', `<tr class="text-xs border-b hover:bg-slate-50"><td class="py-5 px-6 font-bold text-slate-500">${index + 1}</td><td class="py-5 px-6 font-black text-indigo-900 flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0"><i class="fas fa-user"></i></div> ${u.name}</td><td class="py-5 px-6 text-slate-600 italic">${u.email}</td><td class="py-5 px-6 font-mono text-slate-600">${u.nik || '-'}</td><td class="py-5 px-6 font-mono text-slate-600">${u.phone || '-'}</td><td class="py-5 px-6"><span class="text-slate-500 uppercase">${u.bank || '-'}</span> <br> <span class="font-mono text-indigo-600 font-bold">${u.rek || '-'}</span></td><td class="py-5 px-6">${projectHtml}</td>${extraCol}</tr>`);
+                tbody.insertAdjacentHTML('beforeend', `<tr class="text-xs border-b hover:bg-slate-50"><td class="py-5 px-6 font-bold text-slate-500">${index + 1}</td><td class="py-5 px-6 font-black text-indigo-900 flex items-center gap-3">${avatarHtml} ${u.name}</td><td class="py-5 px-6 text-slate-600 italic">${u.email}</td><td class="py-5 px-6 font-mono text-slate-600">${u.nik || '-'}</td><td class="py-5 px-6 font-mono text-slate-600">${u.phone || '-'}</td><td class="py-5 px-6"><span class="text-slate-500 uppercase">${u.bank || '-'}</span> <br> <span class="font-mono text-indigo-600 font-bold">${u.rek || '-'}</span></td><td class="py-5 px-6">${projectHtml}</td></tr>`);
             });
         };
 
@@ -867,10 +1061,10 @@
             const rekInvSelect = document.getElementById('form-rek-inv');
             const rekTekSelect = document.getElementById('form-rek-tek');
 
-            if(custSelect) custSelect.innerHTML = '<option value="">-- Pilih Customer --</option>' + customers.map(c => `<option value="${c.email}">${c.name}</option>`).join('');
-            if(invSelect) invSelect.innerHTML = '<option value="">-- Pilih Investor --</option>' + investors.map(i => `<option value="${i.email}">${i.name}</option>`).join('');
+            if(custSelect) custSelect.innerHTML = '<option value="">-- Pilih Customer Terdaftar --</option>' + customers.map(c => `<option value="${c.email}">${c.name} (${c.email})</option>`).join('');
+            if(invSelect) invSelect.innerHTML = '<option value="">-- Pilih Investor Terdaftar --</option>' + investors.map(i => `<option value="${i.email}">${i.name} (${i.email})</option>`).join('');
             
-            const rekOptions = '<option value="">-- Tidak Ada / Opsional --</option>' + rekanans.map(r => `<option value="${r.email}">${r.name}</option>`).join('');
+            const rekOptions = '<option value="">-- Tidak Ada / Opsional --</option>' + rekanans.map(r => `<option value="${r.email}">${r.name} (${r.email})</option>`).join('');
             if(rekCustSelect) rekCustSelect.innerHTML = rekOptions;
             if(rekInvSelect) rekInvSelect.innerHTML = rekOptions;
             if(rekTekSelect) rekTekSelect.innerHTML = rekOptions;
@@ -879,9 +1073,7 @@
         window.doLogin = function() {
             const e = document.getElementById('login-email').value.toLowerCase();
             const p = document.getElementById('login-password').value;
-            
-            if(!isReady.users) return window.showToast("Sinkronisasi database berlangsung, harap tunggu sebentar.", "warning");
-            
+            if(!isReady.users) return window.showToast("Sinkronisasi database sedang berlangsung, mohon tunggu beberapa detik.", "warning");
             const u = window.dbUsers.find(x => x.email === e && x.pass === p);
             if(u) { sessionStorage.setItem('kalimaja_session_email', e); window.activeUser = u; window.loadDashboard(); }
             else window.showToast("Email atau Sandi salah!", "error");
@@ -894,31 +1086,19 @@
             const role = document.getElementById('reg-role').value;
             const nik = document.getElementById('reg-nik').value;
             const phone = document.getElementById('reg-phone').value;
-            const bank = document.getElementById('reg-bank').value;
-            const rek = document.getElementById('reg-rek').value;
-            const tier = document.getElementById('reg-tier') ? document.getElementById('reg-tier').value : null;
-
-            if(!name || !email || !pass || !nik || !phone || !bank || !rek) return window.showToast("Harap isi semua kolom pendaftaran!", "warning");
-            if(role === 'investor' && !tier) return window.showToast("Harap pilih Tier Investasi!", "error");
-
+            if(!name || !email || !pass) return alert("Lengkapi data pendaftaran!");
             try {
-                const userData = { name, email, pass, role, nik, phone, bank, rek, tier: role === 'investor' ? tier : null, createdAt: new Date().toISOString() };
-                // AKSES FIREBASE LANGSUNG
-                await setDoc(getPubDoc("users", email), userData);
-                window.showToast("Daftar Berhasil! Silakan Login.", "success");
-                setTimeout(() => location.reload(), 1500);
-            } catch(e) { window.showToast("Gagal menyimpan ke Cloud.", "error"); }
+                await setDoc(getPubDoc("users", email), { name, email, pass, role, nik, phone, createdAt: new Date().toISOString() });
+                alert("Daftar Berhasil! Silakan Login."); location.reload();
+            } catch(e) { alert("Error: Gagal menyimpan data pengguna ke Cloud."); }
         };
 
         window.saveProject = async function() {
             const loc = document.getElementById('form-loc').value;
             const cust = document.getElementById('form-cust-email').value;
             const inv = document.getElementById('form-inv-email').value;
-            const h = parseInt(document.getElementById('form-hours').value) || 12;
-            const d = parseInt(document.getElementById('form-days').value) || 26;
+            if(!loc || !cust || !inv) return alert("Lengkapi data utama proyek (Lokasi, Customer, Investor)!");
             
-            if(!loc || !cust || !inv) return window.showToast("Pilih Email Customer, Investor, & Isi Lokasi Gedung!", "warning");
-
             const now = new Date(); const mm = String(now.getMonth()+1).padStart(2,'0'); const yy = String(now.getFullYear()).slice(-2);
             const suffix = mm + yy; const sameMonth = window.dbProjects.filter(p => String(p.id).endsWith(suffix));
             const gid = window.editingProjectId || "KSA" + String(sameMonth.length + 1).padStart(3, '0') + suffix;
@@ -933,15 +1113,11 @@
                 }
             });
 
-            if(units.length === 0) return window.showToast("Tambahkan minimal 1 Unit AC.", "warning");
-
-            const pData = { id: gid, location: loc, custEmail: cust, invEmail: inv, rekCustEmail: document.getElementById('form-rek-cust').value, rekInvEmail: document.getElementById('form-rek-inv').value, rekTekEmail: document.getElementById('form-rek-tek').value, jasaTeknisi: totalJasa, capex: totalCapex, baseline: (totalWatt/1000)*h*d, hours: h, days: d, units, createdAt: window.editingProjectId ? (window.dbProjects.find(p => p.id === window.editingProjectId)?.createdAt || now.toISOString()) : now.toISOString() };
+            const pData = { id: gid, location: loc, custEmail: cust, invEmail: inv, rekCustEmail: document.getElementById('form-rek-cust').value, rekInvEmail: document.getElementById('form-rek-inv').value, rekTekEmail: document.getElementById('form-rek-tek').value, jasaTeknisi: totalJasa, capex: totalCapex, baseline: (totalWatt/1000)*12*26, units, createdAt: now.toISOString() };
             try {
-                // MENGGUNAKAN CLOUD FIREBASE SECARA MURNI
                 await setDoc(getPubDoc("projects", gid), pData);
-                window.showToast("Proyek Cloud Disimpan!", "success"); 
-                window.uiModal('project-modal', false);
-            } catch(e) { window.showToast("Gagal menyimpan data proyek ke Cloud.", "error"); }
+                window.showToast("Proyek Cloud Disimpan!", "success"); window.uiModal('project-modal', false);
+            } catch(e) { alert("Gagal menyimpan data proyek."); }
         };
 
         window.addACRow = function() {
@@ -972,28 +1148,26 @@
             window.renderProjectData();
         };
 
-        // FUNGSI HAPUS MURNI MENGGUNAKAN CLOUD
         window.clearAllData = async function() {
-            if(confirm("PERINGATAN KRITIS: Hapus seluruh data Cloud? (Tindakan ini tidak bisa dibatalkan)")) {
-                document.getElementById('cloud-loader').style.display = 'flex';
+            if(confirm("Hapus seluruh data Cloud? (Tindakan ini tidak bisa dibatalkan)")) {
                 try {
                     for(let u of window.dbUsers) await deleteDoc(getPubDoc('users', u.email));
-                    for(let p of window.dbProjects) await deleteDoc(getPubDoc('projects', p.id));
-                    for(let l of window.dbLogs) await deleteDoc(getPubDoc('logs', l.id || l.timestamp));
-                    sessionStorage.clear();
                     location.reload();
-                } catch(e) { window.showToast("Gagal menghapus data dari Cloud.", "error"); window.forceHideLoader(); }
+                } catch(e) { window.showToast("Gagal menghapus data dari Cloud.", "error"); }
             }
         };
 
+        window.doLogout = function() { sessionStorage.clear(); location.reload(); };
+
         function checkDone() {
             if (isReady.users && isReady.projs && isReady.logs) {
-                window.forceHideLoader();
+                const loader = document.getElementById('cloud-loader');
+                if (loader) loader.style.display = 'none';
                 const sessionEmail = sessionStorage.getItem('kalimaja_session_email');
                 if (sessionEmail && !window.activeUser) {
                     const u = window.dbUsers.find(x => x.email === sessionEmail);
                     if (u) { window.activeUser = u; window.loadDashboard(); }
-                } else if(!window.activeUser) {
+                } else if (!window.activeUser) {
                     document.getElementById('auth-screen').classList.remove('hidden-el');
                 }
             }
@@ -1001,7 +1175,7 @@
 
         // --- INIT FIREBASE SINKRONISASI BYPASS ---
         async function startSystem() {
-            // Failsafe timer (Mencegah Layar Putih)
+            // FAILSAFE 4 DETIK (Paksa hapus layar loading)
             setTimeout(() => {
                 const loader = document.getElementById('cloud-loader');
                 if(loader && loader.style.display !== 'none') {
@@ -1014,19 +1188,24 @@
             }, 4000);
 
             try {
-                // Bypass Firebase Auth jika Config tidak mendukung (Mengamankan jalan ke Cloud)
+                // Mencoba autentikasi jika ada token. Jika gagal (misal config Firebase belum disetting), 
+                // blokir catch agar script TIDAK STOP.
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token).catch(e => console.warn("Token bypass"));
+                    await signInWithCustomToken(auth, __initial_auth_token).catch(e => console.warn("Sesi custom token dilewati."));
                 } else {
-                    await signInAnonymously(auth).catch(e => console.warn("Anon bypass"));
+                    await signInAnonymously(auth).catch(e => console.warn("Sesi anonim dilewati."));
                 }
-            } catch(e) {}
+            } catch(e) {
+                // Apapun error dari Firebase Auth, kita akan terus maju ke pembacaan data publik
+                console.warn("Auth bypass logic triggered.");
+            }
 
-            // Mengambil Data Dari Cloud Secara Real-Time
+            // Membaca data publik (Pastikan Firestore Rules Anda: allow read, write: if true;)
             try {
                 onSnapshot(getPubPath("users"), s => { window.dbUsers = s.docs.map(d => d.data()); isReady.users = true; checkDone(); window.autoRefreshUI(); }, e => { isReady.users = true; checkDone(); });
                 onSnapshot(getPubPath("projects"), s => { window.dbProjects = s.docs.map(d => d.data()); isReady.projs = true; checkDone(); window.autoRefreshUI(); }, e => { isReady.projs = true; checkDone(); });
                 onSnapshot(getPubPath("logs"), s => { window.dbLogs = s.docs.map(d => d.data()); isReady.logs = true; checkDone(); window.autoRefreshUI(); }, e => { isReady.logs = true; checkDone(); });
+                onSnapshot(getPubPath("chats"), s => { window.dbChats = s.docs.map(d => d.data()); isReady.chats = true; checkDone(); window.autoRefreshUI(); }, e => { isReady.chats = true; checkDone(); });
             } catch(e) {
                 console.error("Firestore Listeners Failed", e);
             }
@@ -1034,5 +1213,54 @@
 
         startSystem();
     </script>
+
+<!-- FIREBASE FIXED -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBnvway6x7QTxv4kup7lW5TEKNwkocRdL4",
+  authDomain: "kalimaja-airtron-system.firebaseapp.com",
+  projectId: "kalimaja-airtron-system",
+  storageBucket: "kalimaja-airtron-system.firebasestorage.app",
+  messagingSenderId: "785700779057",
+  appId: "1:785700779057:web:b4e19c1908ffe680459110"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+function doRegister() {
+  const email = document.getElementById("reg-email").value;
+  const password = document.getElementById("reg-password").value;
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => alert("Register berhasil!"))
+    .catch(error => alert(error.message));
+}
+
+function doLogin() {
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      alert("Login berhasil!");
+      document.getElementById("auth-screen").classList.add("hidden-el");
+      document.getElementById("app-content").classList.remove("hidden-el");
+    })
+    .catch(error => alert(error.message));
+}
+
+auth.onAuthStateChanged(user => {
+  const loader = document.getElementById("cloud-loader");
+  if(loader) loader.style.display = "none";
+});
+</script>
+
 </body>
 </html>
