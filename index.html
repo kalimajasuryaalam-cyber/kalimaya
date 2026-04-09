@@ -144,56 +144,7 @@
 
 <script>
 </script>
-<!-- FIREBASE -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBnvway6x7QTxv4kup7lW5TEKNwkocRdL4",
-  authDomain: "kalimaja-airtron-system.firebaseapp.com",
-  projectId: "kalimaja-airtron-system",
-  storageBucket: "kalimaja-airtron-system.firebasestorage.app",
-  messagingSenderId: "785700779057",
-  appId: "1:785700779057:web:b4e19c1908ffe680459110",
-  measurementId: "G-NP95EWNKQ9"
-};
-
-firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
-const db = firebase.firestore();
-</script>
-
-<script>
-function doRegister() {
-  const email = document.getElementById("reg-email").value;
-  const password = document.getElementById("reg-password").value;
-
-  auth.createUserWithEmailAndPassword(email, password)
-    .then(() => alert("Register berhasil!"))
-    .catch(error => alert(error.message));
-}
-
-function doLogin() {
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
-
-  auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      alert("Login berhasil!");
-      document.getElementById("auth-screen").classList.add("hidden-el");
-      document.getElementById("app-content").classList.remove("hidden-el");
-      document.getElementById("cloud-loader").style.display = "none";
-    })
-    .catch(error => alert(error.message));
-}
-</script>
-auth.onAuthStateChanged(user => {
-  document.getElementById("cloud-loader").style.display = "none";
-});
-    <body class="bg-slate-50 text-slate-900 min-h-screen text-left">
+<body class="bg-slate-50 text-slate-900 min-h-screen text-left">
 
     <!-- CLOUD LOADER -->
     <div id="cloud-loader" class="fixed inset-0 z-[999] bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-500">
@@ -1262,5 +1213,54 @@ auth.onAuthStateChanged(user => {
 
         startSystem();
     </script>
+
+<!-- FIREBASE FIXED -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBnvway6x7QTxv4kup7lW5TEKNwkocRdL4",
+  authDomain: "kalimaja-airtron-system.firebaseapp.com",
+  projectId: "kalimaja-airtron-system",
+  storageBucket: "kalimaja-airtron-system.firebasestorage.app",
+  messagingSenderId: "785700779057",
+  appId: "1:785700779057:web:b4e19c1908ffe680459110"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+function doRegister() {
+  const email = document.getElementById("reg-email").value;
+  const password = document.getElementById("reg-password").value;
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => alert("Register berhasil!"))
+    .catch(error => alert(error.message));
+}
+
+function doLogin() {
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      alert("Login berhasil!");
+      document.getElementById("auth-screen").classList.add("hidden-el");
+      document.getElementById("app-content").classList.remove("hidden-el");
+    })
+    .catch(error => alert(error.message));
+}
+
+auth.onAuthStateChanged(user => {
+  const loader = document.getElementById("cloud-loader");
+  if(loader) loader.style.display = "none";
+});
+</script>
+
 </body>
 </html>
