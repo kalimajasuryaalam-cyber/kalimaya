@@ -142,7 +142,8 @@
     <!-- CLOUD LOADER -->
     <div id="cloud-loader" class="fixed inset-0 z-[999] bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
-        <p class="text-white font-bold tracking-widest uppercase text-xs animate-pulse">Menghubungkan Database Cloud...</p>
+        <p class="text-white font-bold tracking-widest uppercase text-xs animate-pulse mt-4">Menghubungkan Database Cloud...</p>
+        <p id="loader-status" class="text-slate-400 font-medium text-[10px] mt-2 italic">Menginisialisasi sesi...</p>
     </div>
 
     <!-- LAYAR AUTENTIKASI -->
@@ -246,8 +247,8 @@
 
     <!-- MAIN APP DASHBOARD -->
     <div id="app-content" class="hidden-el">
-        <aside class="fixed left-0 top-0 h-full w-64 sidebar-gradient text-white p-6 no-print hidden lg:flex lg:flex-col z-50 text-left">
-            <div class="flex items-center gap-3 mb-10 shrink-0">
+        <aside class="fixed left-0 top-0 h-full w-64 sidebar-gradient text-white p-6 no-print hidden lg:block z-50 text-left">
+            <div class="flex items-center gap-3 mb-10">
                 <div class="h-10 w-10 bg-indigo-500/20 border border-indigo-400/30 rounded-lg flex items-center justify-center text-white">
                     <i class="fas fa-bolt text-amber-400"></i>
                 </div>
@@ -257,22 +258,22 @@
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto pr-2">
-                <nav class="space-y-2">
+            <nav class="space-y-6">
+                <div class="space-y-2 text-left">
                     <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest px-2 italic">Akses Level: <span id="user-role-badge" class="text-amber-400">-</span></p>
                     
-                    <button onclick="switchView('dashboard')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-sm font-bold border-l-4 border-amber-500 text-left text-white shadow-sm transition-all mt-4">
+                    <button onclick="switchView('dashboard')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-sm font-bold border-l-4 border-amber-500 text-left text-white shadow-sm transition-all">
                         <i class="fas fa-th-large w-5"></i> Dashboard Utama
                     </button>
 
-                    <!-- PUSAT PESAN -->
+                    <!-- PUSAT PESAN (DAPAT DIAKSES SEMUA ROLE) DENGAN BADGE -->
                     <button onclick="openChatView()" class="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 rounded-xl text-sm font-medium text-slate-300 hover:text-white text-left transition-all">
                         <div class="flex items-center gap-3">
                             <i class="fas fa-comments w-5"></i> Pusat Pesan
                         </div>
                         <span id="global-unread-badge" class="hidden-el bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm">0</span>
                     </button>
-
+                    
                     <!-- MENU ADMIN -->
                     <div id="admin-actions" class="hidden-el space-y-2 pt-2">
                         <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest px-2 italic mt-4 mb-2">Administrasi Data</p>
@@ -297,21 +298,17 @@
                             <i class="fas fa-microchip w-5"></i> Input kWh Real
                         </button>
 
-                        <div class="pt-6 mt-6 border-t border-red-500/20 text-left">
-                            <p class="text-[9px] font-bold text-red-500/70 uppercase tracking-widest px-2 italic mb-2">Zona Berbahaya</p>
-                            <button onclick="clearAllData()" class="w-full flex items-center gap-3 px-4 py-3 bg-red-950/40 hover:bg-red-600 rounded-xl text-[10px] font-black text-red-400 hover:text-white border border-red-900 transition-all text-left uppercase tracking-widest">
-                                <i class="fas fa-exclamation-triangle w-5"></i> Hapus Database
-                            </button>
-                        </div>
+                        <button onclick="clearAllData()" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/20 rounded-xl text-sm font-medium text-red-400 text-left transition-all mt-4">
+                            <i class="fas fa-trash w-5"></i> Hapus Sistem
+                        </button>
                     </div>
-                </nav>
-            </div>
-            
-            <div class="pt-6 border-t border-white/10 shrink-0 text-left mt-auto">
-                <button onclick="doLogout()" class="w-full flex items-center gap-3 px-4 py-3 bg-slate-800/50 hover:bg-slate-700 rounded-xl text-sm font-bold text-slate-200 transition-all text-left border border-slate-700">
-                    <i class="fas fa-sign-out-alt w-5 text-slate-400"></i> Keluar Sistem
-                </button>
-            </div>
+                </div>
+                <div class="pt-4 border-t border-white/5">
+                    <button onclick="doLogout()" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/20 rounded-xl text-sm font-bold text-red-400 transition-all text-left">
+                        <i class="fas fa-sign-out-alt w-5"></i> Keluar Sistem
+                    </button>
+                </div>
+            </nav>
         </aside>
 
         <!-- MAIN WORKSPACE -->
@@ -363,35 +360,25 @@
                         <h3 class="font-black italic uppercase tracking-tight text-indigo-950">Buku Kontak</h3>
                         <i class="fas fa-address-book text-slate-300"></i>
                     </div>
-                    <div id="contact-list" class="space-y-2 overflow-y-auto flex-1 pr-2"></div>
+                    <div id="contact-list" class="space-y-2 overflow-y-auto flex-1 pr-2">
+                        <!-- Disuntik via JS -->
+                    </div>
                 </div>
                 <!-- Ruang Chatting Sebelah Kanan -->
                 <div class="flex-1 bg-white rounded-[32px] card-shadow border border-slate-100 flex flex-col overflow-hidden">
-                    <div class="p-6 border-b border-slate-100 bg-slate-50/80 flex items-center gap-4 shrink-0">
+                    <div class="p-6 border-b border-slate-100 bg-slate-50/80 flex items-center gap-4">
                         <div class="h-12 w-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl shadow-inner border-2 border-white"><i class="fas fa-headset"></i></div>
                         <div>
                             <h4 id="chat-active-name" class="font-black uppercase text-slate-900 leading-tight">Memuat Kontak...</h4>
                             <p id="chat-active-role" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">-</p>
                         </div>
                     </div>
-                    
-                    <div id="chat-messages" class="flex-1 p-6 overflow-y-auto bg-slate-50/30 space-y-4"></div>
-                    
-                    <div class="flex flex-col bg-white border-t border-slate-100 p-4 shrink-0">
-                        <div id="attachment-preview" class="hidden-el flex items-center gap-2 mb-2 p-2 bg-indigo-50 rounded-lg border border-indigo-100 text-xs font-bold text-indigo-800 w-fit">
-                            <i class="fas fa-file-alt"></i> <span id="attachment-name" class="truncate max-w-[200px]">filename.png</span>
-                            <button onclick="window.clearAttachment()" class="ml-2 text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 h-5 w-5 rounded-full flex items-center justify-center"><i class="fas fa-times text-[10px]"></i></button>
-                        </div>
-                        
-                        <div class="flex gap-2 items-center">
-                            <label class="cursor-pointer text-slate-400 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 h-12 w-12 rounded-xl flex items-center justify-center transition-all border-2 border-slate-100 shrink-0" title="Lampirkan File">
-                                <i class="fas fa-paperclip text-lg"></i>
-                                <input type="file" id="chat-file-input" class="hidden" accept=".pdf, image/png, image/jpeg, image/jpg" onchange="window.handleFileSelect(event)">
-                            </label>
-                            
-                            <input type="text" id="chat-input" placeholder="Tuliskan pesan Anda..." class="flex-1 bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-medium outline-none focus:border-indigo-400 transition-all" onkeypress="if(event.key === 'Enter') sendChatMessage()">
-                            <button onclick="sendChatMessage()" class="bg-indigo-600 hover:bg-indigo-800 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md shrink-0">Kirim</button>
-                        </div>
+                    <div id="chat-messages" class="flex-1 p-6 overflow-y-auto bg-slate-50/30 space-y-4">
+                        <!-- Pesan disuntik via JS -->
+                    </div>
+                    <div class="p-4 border-t border-slate-100 bg-white flex gap-3 items-center">
+                        <input type="text" id="chat-input" placeholder="Tuliskan pesan Anda..." class="flex-1 bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-medium outline-none focus:border-indigo-400 transition-all" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                        <button onclick="sendChatMessage()" class="bg-indigo-600 hover:bg-indigo-800 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md">Kirim</button>
                     </div>
                 </div>
             </div>
@@ -456,7 +443,9 @@
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Pilih kartu proyek untuk melihat performa detail</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="investor-portfolio-grid"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="investor-portfolio-grid">
+                        <!-- Disuntikkan via JS -->
+                    </div>
                 </div>
 
                 <!-- PANEL MULTI-PROYEK -->
@@ -741,7 +730,76 @@
                 </div>
             </div>
             <div class="p-6 bg-slate-50 border-t border-slate-100">
-                <button onclick="window.saveBankData()" class="w-full bg-indigo-950 text-white py-4 rounded-xl font-black uppercase tracking-widest hover:scale-[1.02] transition-all shadow-md">Simpan Perubahan</button>
+                <button onclick="saveBankData()" class="w-full bg-indigo-950 text-white py-4 rounded-xl font-black uppercase tracking-widest hover:scale-[1.02] transition-all shadow-md">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TEMPLATE CETAK INVOICE (TERSEMBUNYI KECUALI SAAT PRINT) -->
+    <div id="invoice-print-template" class="p-8 max-w-4xl mx-auto bg-white text-slate-900">
+        <div class="border-b-4 border-indigo-950 pb-6 mb-8 flex justify-between items-end">
+            <div>
+                <h1 class="text-4xl font-black italic uppercase tracking-tighter text-indigo-950 leading-none">KALIMAJA AIRTRON</h1>
+                <p class="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] mt-2">PT Kalimaja Surya Alam</p>
+                <p class="text-xs text-slate-500 mt-1">Tangerang, Banten, Indonesia</p>
+            </div>
+            <div class="text-right">
+                <h2 class="text-3xl font-black text-slate-800 uppercase tracking-widest mb-2">INVOICE TAGIHAN</h2>
+                <p class="text-sm font-bold text-slate-600" id="inv-date">Tanggal: -</p>
+                <p class="text-sm font-bold text-slate-600">No: <span id="inv-number" class="mono text-indigo-700">-</span></p>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-start mb-10">
+            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 min-w-[300px]">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Ditagihkan Kepada:</p>
+                <p class="text-xl font-black text-slate-800 uppercase mb-1" id="inv-cust-name">-</p>
+                <p class="text-sm font-bold text-slate-600 uppercase" id="inv-cust-loc"><i class="fas fa-map-marker-alt mr-1"></i> -</p>
+            </div>
+            <div class="text-right p-6">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Periode Konsumsi & Bagi Hasil:</p>
+                <p class="text-2xl font-black text-indigo-600 uppercase italic border-b-2 border-indigo-200 inline-block pb-1" id="inv-period">-</p>
+            </div>
+        </div>
+
+        <table class="w-full text-left border-collapse mb-10">
+            <thead class="bg-indigo-950 text-white">
+                <tr>
+                    <th class="py-4 px-6 text-xs font-bold uppercase tracking-widest rounded-tl-xl">Keterangan / Parameter</th>
+                    <th class="py-4 px-6 text-xs font-bold uppercase tracking-widest text-right rounded-tr-xl">Nilai (IDR)</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 border border-slate-200">
+                <tr>
+                    <td class="py-5 px-6 text-sm font-bold text-slate-500 italic">Estimasi Tagihan Listrik Normal (Tanpa Airtron)</td>
+                    <td class="py-5 px-6 text-right text-sm font-bold text-slate-400 line-through decoration-red-400 mono" id="inv-val-normal">-</td>
+                </tr>
+                <tr>
+                    <td class="py-5 px-6 text-sm font-bold text-slate-700">Tagihan Aktual Listrik PLN (Terakhir)</td>
+                    <td class="py-5 px-6 text-right text-sm font-black text-slate-800 mono" id="inv-val-actual">-</td>
+                </tr>
+                <tr class="bg-emerald-50/50">
+                    <td class="py-5 px-6 text-sm font-black text-emerald-700 uppercase">Gross Saving (Realisasi Penghematan)</td>
+                    <td class="py-5 px-6 text-right text-base font-black text-emerald-600 mono" id="inv-val-saving">-</td>
+                </tr>
+                <tr class="bg-indigo-50 border-t-2 border-indigo-200">
+                    <td id="inv-label-total" class="py-6 px-6 text-base font-black text-indigo-950 uppercase tracking-widest">Total Tagihan Bagi Hasil</td>
+                    <td class="py-6 px-6 text-right text-2xl font-black text-indigo-700 mono" id="inv-val-total">-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="border-t-2 border-dashed border-slate-200 pt-8 flex justify-between items-start mt-10">
+            <div class="bg-amber-50 p-6 rounded-2xl border border-amber-100 max-w-sm">
+                <p class="text-[10px] font-black text-amber-700 uppercase tracking-widest mb-3"><i class="fas fa-info-circle mr-1"></i> Instruksi Pembayaran:</p>
+                <p class="text-sm font-bold text-slate-800 uppercase mb-1" id="inv-bank-name">-</p>
+                <p class="text-xl font-black text-indigo-950 mono tracking-widest mb-1" id="inv-bank-rek">-</p>
+                <p class="text-xs font-bold text-slate-600 uppercase" id="inv-bank-owner">A.n -</p>
+            </div>
+            <div class="text-center pt-4">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-16">Hormat Kami,</p>
+                <p class="text-sm font-black text-slate-800 uppercase border-b border-slate-800 pb-1 inline-block">PT KALIMAJA SURYA ALAM</p>
+                <p class="text-xs text-slate-500 font-bold mt-1">Divisi Kemitraan & Keuangan</p>
             </div>
         </div>
     </div>
@@ -818,7 +876,7 @@
                     <p class="text-[9px] font-black text-slate-400 uppercase italic leading-none mb-1">Total CAPEX Investasi</p>
                     <p id="form-capex-display" class="text-2xl font-black mono text-indigo-950 italic leading-none">Rp 0</p>
                 </div>
-                <button id="project-modal-btn" onclick="window.saveProject()" class="bg-indigo-950 text-white px-12 py-4 rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Aktifkan Kontrak</button>
+                <button id="project-modal-btn" onclick="saveProject()" class="bg-indigo-950 text-white px-12 py-4 rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Aktifkan Kontrak</button>
             </div>
         </div>
     </div>
@@ -850,356 +908,1072 @@
                     <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total Akumulasi kWh</span>
                     <span id="in-kwh-total" class="text-2xl font-black text-indigo-900">0 kWh</span>
                 </div>
-                <button onclick="window.saveKwh()" class="w-full bg-indigo-950 text-white py-5 rounded-3xl font-black uppercase tracking-widest shadow-xl hover:scale-105 transition-all">Simpan Tagihan Baru</button>
+                <button onclick="saveKwh()" class="w-full bg-indigo-950 text-white py-5 rounded-3xl font-black uppercase tracking-widest shadow-xl hover:scale-105 transition-all">Simpan Tagihan Baru</button>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT FIREBASE CLOUD DATABASE -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // MENGHAPUS TRY-CATCH YANG BIKIN ERROR, GUNAKAN FALLBACK LANGSUNG
-        const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const firebaseConfig = envConfig || {
-            apiKey: "AIzaSy" + "Bnvway6x7QTxv4" + "kup7lW5TEKNwkocRdL4", 
-            authDomain: "kalimaja-airtron-system.firebaseapp.com",
-            projectId: "kalimaja-airtron-system",
-            storageBucket: "kalimaja-airtron-system.appspot.com",
-            messagingSenderId: "785700779057",
-            appId: "1:785700779057:web:b4e19c1908ffe680459110"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // PATH STRATEGY
-        const getPubPath = (col) => collection(db, 'artifacts', appId, 'public', 'data', col);
-        const getPubDoc = (col, id) => doc(db, 'artifacts', appId, 'public', 'data', col, id);
-
-        window.dbUsers = []; window.dbProjects = []; window.dbLogs = []; window.dbChats = [];
-        window.activeUser = null; window.activeProject = null;
-        window.activeChatContact = null; window.currentAttachment = null; window.editingProjectId = null; window.editingLogId = null;
-        
-        let isReady = { users: false, projs: false, logs: false, chats: false };
-
-        const formatIDR = (v) => new Intl.NumberFormat('id-ID', {style:'currency', currency:'IDR', maximumFractionDigits:0}).format(v || 0);
-        const formatNum = (v) => new Intl.NumberFormat('id-ID').format(v || 0);
-        const setUI = (id, val) => { const el = document.getElementById(id); if(el) el.innerHTML = val; };
-        
+    <!-- SISTEM DATABASE LOKAL -->
+    <script>
+        // Diubah menjadi konstan matematis mutlak: 1 PK = 840 Watt untuk mencegah distorsi perhitungan Baseline.
         const PRICES = { 0.5:2500000, 0.75:2600000, 1:2750000, 1.5:2750000, 2:3150000, 2.5:3150000, 3:3150000, 3.5:4450000, 4:4450000, 4.5:4450000, 5:5700000, 6:5700000, 7:5700000, 8:6500000, 10:8500000, 12:10500000, 15:12500000, 18:14500000, 20:16500000 };
         const WATTS = { 0.5:420, 0.75:630, 1:840, 1.5:1260, 2:1680, 2.5:2100, 3:2520, 3.5:2940, 4:3360, 4.5:3780, 5:4200, 6:5040, 7:5880, 8:6720, 10:8400, 12:10080, 15:12600, 18:15120, 20:16800 };
+        
+        const SECRET = "ADMIN123";
+        const TARIF_PLN = 1615;
 
-        // --- GLOBAL UI FUNCTIONS ---
-        window.autoRefreshUI = function() {
-            if(!window.activeUser) return;
-            const vn = window.currentViewName;
-            if(vn === 'view-dashboard') window.refreshProjectData();
-            else if(vn === 'view-projects') window.renderProjectTable();
-            else if(vn === 'view-customers') window.renderUserTable('customer');
-            else if(vn === 'view-investors') window.renderUserTable('investor');
-            else if(vn === 'view-rekanan') window.renderUserTable('rekanan');
-            else if(vn === 'view-chat') {
-                if (window.activeUser.role === 'admin') window.renderChatContacts(true);
-                window.renderChatMessages();
-            }
-            window.updateUnreadBadge();
-        };
+        let activeUser = null;
+        let activeProject = null;
+        let editingLogId = null;
+        let editingProjectId = null;
+        let activeChatContact = null;
 
-        window.loadDashboard = function() {
-            const u = window.activeUser; if(!u) return;
-            document.getElementById('auth-screen').classList.add('hidden-el');
-            document.getElementById('app-content').classList.remove('hidden-el');
+        const formatIDR = (v) => new Intl.NumberFormat('id-ID', {style:'currency', currency:'IDR', maximumFractionDigits:0}).format(v);
+        const formatNum = (v) => new Intl.NumberFormat('id-ID').format(v);
+        const setUI = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+
+        // FUNGSI PENGHITUNG RASIO BAGI HASIL DINAMIS 
+        function getSplitRatio(projectDateStr, logPeriodStr) {
+            if (!projectDateStr || !logPeriodStr) return { invGross: 0.7, cust: 0.3, year: 1 };
             
-            setUI('user-role-badge', (u.role || "").toUpperCase());
-            setUI('profile-name', u.name || "User"); 
-            setUI('profile-nik', u.nik || "-");
-            setUI('profile-phone', u.phone || "-");
-
-            const profileImg = document.getElementById('profile-image');
-            const defaultIcon = document.getElementById('profile-default-icon');
-            if (u.avatar) {
-                profileImg.src = u.avatar; profileImg.classList.remove('hidden-el'); defaultIcon.classList.add('hidden-el');
-            } else {
-                profileImg.src = ''; profileImg.classList.add('hidden-el'); defaultIcon.classList.remove('hidden-el');
-            }
-
-            if(u.role === 'admin') {
-                const el = document.getElementById('admin-actions');
-                if(el) el.classList.remove('hidden-el');
-                window.populateAdminDropdowns();
-            }
-            window.refreshProjectData();
-        };
-
-        window.refreshProjectData = function() {
-            const u = window.activeUser;
-            if(u.role === 'rekanan') {
-                const myRekProjs = window.dbProjects.filter(p => p.rekCustEmail === u.email || p.rekInvEmail === u.email || p.rekTekEmail === u.email);
-                let totalJasa = 0, totalKomisi = 0, totalUnit = 0;
-                myRekProjs.forEach(p => {
-                    if(p.rekTekEmail === u.email) totalJasa += (p.jasaTeknisi || 0);
-                    totalUnit += (p.units ? p.units.reduce((a,b)=>a+b.q, 0) : 0);
-                    const pLogs = window.dbLogs.filter(l => l.projectId === p.id);
-                    pLogs.forEach(l => {
-                        const saving = Math.max(0, (p.baseline - l.kwhReal) * 1615);
-                        const companyProfit = (saving * 0.7) * 0.3; 
-                        if(p.rekCustEmail === u.email) totalKomisi += companyProfit * 0.25;
-                        if(p.rekInvEmail === u.email) totalKomisi += companyProfit * 0.15;
-                    });
-                });
-                setUI('rek-total-klien', myRekProjs.length); setUI('rek-total-unit', totalUnit);
-                setUI('rek-total-jasa', formatIDR(totalJasa)); setUI('rek-total-komisi', formatIDR(totalKomisi));
-                document.getElementById('rekanan-dashboard-section').classList.remove('hidden-el');
-            }
-
-            const myProjs = window.dbProjects.filter(p => p.custEmail === u.email || p.invEmail === u.email || u.role === 'admin');
-            const dashView = document.getElementById('dash-view');
-            const emptyMsg = document.getElementById('empty-msg');
-            const ctrls = document.getElementById('project-controls');
-            const sel = document.getElementById('proj-select');
-
-            if(myProjs.length > 0) {
-                if(emptyMsg) emptyMsg.classList.add('hidden-el');
-                if(dashView) dashView.classList.remove('hidden-el');
-                if(ctrls) ctrls.classList.remove('hidden-el');
-                if(sel) sel.innerHTML = myProjs.map(p => `<option value="${p.id}" ${window.activeProject?.id === p.id ? 'selected' : ''}>${p.id} - ${p.location}</option>`).join('');
-                if(!window.activeProject) window.activeProject = myProjs[0];
-                window.renderProjectData();
-            } else if(u.role !== 'rekanan') {
-                if(emptyMsg) emptyMsg.classList.remove('hidden-el');
-                if(dashView) dashView.classList.add('hidden-el');
-                if(ctrls) ctrls.classList.add('hidden-el');
-            }
-        };
-
-        window.renderProjectData = function() {
-            const p = window.activeProject; if(!p) return;
-            setUI('view-loc-name', (p.location || "").toUpperCase());
-            setUI('view-cust-email', "CUSTOMER: " + (p.custEmail || "-"));
-        };
-
-        window.renderProjectTable = function() {
-            const tbody = document.getElementById('table-projects-body'); if(!tbody) return; tbody.innerHTML = '';
-            window.dbProjects.forEach((p, index) => {
-                tbody.insertAdjacentHTML('beforeend', `<tr class="text-xs border-b hover:bg-slate-50"><td class="py-5 px-6 font-bold text-slate-400">${index+1}</td><td class="py-5 px-6 font-black text-indigo-900 uppercase">${p.location}<br><span class="text-[9px] font-mono text-slate-400">${p.id}</span></td><td class="py-5 px-6 text-slate-600 italic">${p.custEmail}</td><td class="py-5 px-6 text-right font-black text-slate-800 mono">${formatIDR(p.capex)}</td><td class="py-5 px-6 text-center"><button onclick="window.goToProjectFromAdmin('${p.id}')" class="px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-[9px] font-black uppercase"><i class="fas fa-eye"></i> Detail</button></td></tr>`);
-            });
-        };
-
-        window.renderUserTable = function(roleType) {
-            let filtered = window.dbUsers.filter(u => u.role === roleType);
-            let tbodyId = '';
-            if (roleType === 'customer') tbodyId = 'table-customers-body';
-            else if (roleType === 'investor') tbodyId = 'table-investors-body';
-            else if (roleType === 'rekanan') tbodyId = 'table-rekanan-body';
+            const pDate = new Date(projectDateStr);
+            let lDate = new Date(logPeriodStr + '-01'); 
+            if (isNaN(lDate)) lDate = new Date(logPeriodStr); 
             
-            let tbody = document.getElementById(tbodyId); if (!tbody) return; tbody.innerHTML = '';
-            if(filtered.length === 0) return;
+            let monthDiff = (lDate.getFullYear() - pDate.getFullYear()) * 12 + (lDate.getMonth() - pDate.getMonth());
+            if(monthDiff < 0) monthDiff = 0;
+            
+            if (monthDiff < 12) return { invGross: 0.7, cust: 0.3, year: 1 };
+            else if (monthDiff < 24) return { invGross: 0.6, cust: 0.4, year: 2 };
+            else return { invGross: 0.5, cust: 0.5, year: 3 };
+        }
 
-            filtered.forEach((u, index) => {
-                let userProjs = [];
-                if (roleType === 'customer') userProjs = window.dbProjects.filter(p => p.custEmail === u.email);
-                else if (roleType === 'investor') userProjs = window.dbProjects.filter(p => p.invEmail === u.email);
-                else if (roleType === 'rekanan') userProjs = window.dbProjects.filter(p => p.rekCustEmail === u.email || p.rekInvEmail === u.email || p.rekTekEmail === u.email);
-
-                let projectHtml = userProjs.length > 0 ? userProjs.map(p => `<button onclick="window.goToProjectFromAdmin('${p.id}')" class="block w-full text-left mb-1 px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-bold uppercase tracking-widest truncate"><i class="fas fa-external-link-alt mr-1"></i> ${p.location}</button>`).join('') : '-';
-                
-                const avatarHtml = u.avatar ? `<img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover">` : `<div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs"><i class="fas fa-user"></i></div>`;
-                
-                tbody.insertAdjacentHTML('beforeend', `<tr class="text-xs border-b hover:bg-slate-50"><td class="py-5 px-6 font-bold text-slate-500">${index + 1}</td><td class="py-5 px-6 font-black text-indigo-900 flex items-center gap-3">${avatarHtml} ${u.name}</td><td class="py-5 px-6 text-slate-600 italic">${u.email}</td><td class="py-5 px-6 font-mono text-slate-600">${u.nik || '-'}</td><td class="py-5 px-6 font-mono text-slate-600">${u.phone || '-'}</td><td class="py-5 px-6"><span class="text-slate-500 uppercase">${u.bank || '-'}</span> <br> <span class="font-mono text-indigo-600 font-bold">${u.rek || '-'}</span></td><td class="py-5 px-6">${projectHtml}</td></tr>`);
-            });
+        // INITIAL LOAD
+        window.onload = function() {
+            const session = localStorage.getItem('kalimaja_session');
+            if(session) {
+                activeUser = JSON.parse(session);
+                loadDashboard();
+            }
         };
 
-        window.doLogin = function() {
-            const e = document.getElementById('login-email').value.toLowerCase();
-            const p = document.getElementById('login-password').value;
-            const u = window.dbUsers.find(x => x.email === e && x.pass === p);
-            if(u) { sessionStorage.setItem('kalimaja_session_email', e); window.activeUser = u; window.loadDashboard(); }
-            else window.showToast("Email atau Sandi salah!", "error");
-        };
-
-        window.doRegister = async function() {
+        // --- AUTHENTICATION ---
+        window.doRegister = function() {
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value.toLowerCase();
             const pass = document.getElementById('reg-password').value;
             const role = document.getElementById('reg-role').value;
+            const key = document.getElementById('reg-admin-key').value;
+            
             const nik = document.getElementById('reg-nik').value;
             const phone = document.getElementById('reg-phone').value;
-            if(!name || !email || !pass) return alert("Harap isi Nama, Email dan Sandi!");
+            const bank = document.getElementById('reg-bank').value;
+            const rek = document.getElementById('reg-rek').value;
 
-            try {
-                const userData = { name, email, pass, role, nik, phone, createdAt: new Date().toISOString() };
-                await setDoc(getPubDoc("users", email), userData);
-                alert("Berhasil Daftar! Silakan Login.");
-                location.reload();
-            } catch(e) { alert("Daftar gagal: " + e.message); }
+            if(!name || !email || !pass || !nik || !phone || !bank || !rek) return alert("Harap lengkapi semua kolom pendaftaran (Termasuk Data Bank & NIK).");
+            if(pass.length < 6) return alert("Sandi minimal 6 karakter.");
+            if(role === 'admin' && key !== SECRET) return alert("Kunci Admin salah!");
+
+            let users = JSON.parse(localStorage.getItem('kalimaja_users')) || [];
+            if(users.find(u => u.email === email)) return alert("Email sudah terdaftar!");
+
+            users.push({ name, email, pass, role, nik, phone, bank, rek });
+            localStorage.setItem('kalimaja_users', JSON.stringify(users));
+            
+            alert("Pendaftaran Berhasil! Silakan masuk dengan email Anda.");
+            document.getElementById('login-email').value = email;
+            document.getElementById('login-password').value = pass;
+            showLogin();
         };
 
-        window.saveProject = async function() {
-            const loc = document.getElementById('form-loc').value;
-            const cust = document.getElementById('form-cust-email').value;
-            const inv = document.getElementById('form-inv-email').value;
-            if(!loc || !cust || !inv) return alert("Lengkapi data utama proyek!");
-            
-            const now = new Date(); const mm = String(now.getMonth()+1).padStart(2,'0'); const yy = String(now.getFullYear()).slice(-2);
-            const suffix = mm + yy; const sameMonth = window.dbProjects.filter(p => String(p.id).endsWith(suffix));
-            const gid = window.editingProjectId || "KSA" + String(sameMonth.length + 1).padStart(3, '0') + suffix;
+        window.doLogin = function() {
+            const email = document.getElementById('login-email').value.toLowerCase();
+            const pass = document.getElementById('login-password').value;
 
-            let units = []; let totalWatt = 0; let totalCapex = 0; let totalJasa = 0;
-            document.querySelectorAll('#unit-rows-area > div').forEach(row => {
-                const pk = row.querySelector('.pk-sel').value; const q = parseInt(row.querySelector('.qty-in').value) || 0;
-                if(q > 0) {
-                    units.push({pk, q}); totalWatt += WATTS[pk] * q; totalCapex += PRICES[pk] * q;
-                    let pkNum = parseFloat(pk);
-                    if (pkNum <= 2.5) totalJasa += 150000 * q; else if (pkNum <= 10) totalJasa += 250000 * q; else totalJasa += 350000 * q;
-                }
+            if(!email || !pass) return alert("Isi email dan kata sandi.");
+
+            let users = JSON.parse(localStorage.getItem('kalimaja_users')) || [];
+            const user = users.find(u => u.email === email && u.pass === pass);
+
+            if(user) {
+                activeUser = user;
+                localStorage.setItem('kalimaja_session', JSON.stringify(user));
+                loadDashboard();
+            } else {
+                alert("Login Gagal: Email tidak ditemukan atau sandi salah.");
+            }
+        };
+
+        window.doLogout = function() {
+            localStorage.removeItem('kalimaja_session');
+            activeUser = null;
+            location.reload();
+        };
+
+        // --- PUSAT PESAN / CHAT SYSTEM ---
+        window.openChatView = function() {
+            switchView('chat');
+            const contactBox = document.getElementById('chat-contacts');
+            
+            if(activeUser.role === 'admin') {
+                contactBox.classList.remove('hidden-el');
+                renderChatContacts();
+            } else {
+                contactBox.classList.add('hidden-el');
+                activeChatContact = 'admin'; // Paksa chat hanya dengan admin
+                setUI('chat-active-name', 'TIM SUPPORT KALIMAJA');
+                setUI('chat-active-role', 'Layanan Pelanggan & Investor');
+                renderChatMessages();
+            }
+        };
+
+        function renderChatContacts() {
+            const users = JSON.parse(localStorage.getItem('kalimaja_users')) || [];
+            const nonAdmins = users.filter(u => u.role !== 'admin');
+            const list = document.getElementById('contact-list');
+            list.innerHTML = '';
+            
+            nonAdmins.forEach(u => {
+                const isActive = activeChatContact === u.email;
+                list.insertAdjacentHTML('beforeend', `
+                    <div onclick="selectChatContact('${u.email}', '${u.name}', '${u.role}')" class="p-4 rounded-xl cursor-pointer transition-all mb-2 ${isActive ? 'bg-indigo-50 border border-indigo-200 shadow-sm' : 'bg-slate-50 border border-transparent hover:bg-slate-100'}">
+                        <p class="font-black text-sm text-slate-800 uppercase leading-none">${u.name}</p>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">${u.role} - ${u.email}</p>
+                    </div>
+                `);
             });
 
-            const pData = { id: gid, location: loc, custEmail: cust, invEmail: inv, rekCustEmail: document.getElementById('form-rek-cust').value, rekInvEmail: document.getElementById('form-rek-inv').value, rekTekEmail: document.getElementById('form-rek-tek').value, jasaTeknisi: totalJasa, capex: totalCapex, baseline: (totalWatt/1000)*12*26, units, createdAt: now.toISOString() };
-            try {
-                await setDoc(getPubDoc("projects", gid), pData);
-                window.showToast("Proyek Cloud Disimpan!", "success");
-                window.uiModal('project-modal', false);
-            } catch(e) { alert("Gagal menyimpan data proyek."); }
+            if(!activeChatContact && nonAdmins.length > 0) {
+                selectChatContact(nonAdmins[0].email, nonAdmins[0].name, nonAdmins[0].role);
+            }
+        }
+
+        window.selectChatContact = function(email, name, role) {
+            activeChatContact = email;
+            setUI('chat-active-name', name);
+            setUI('chat-active-role', role);
+            if(activeUser.role === 'admin') renderChatContacts(); 
+            renderChatMessages();
         };
 
-        window.addACRow = function() {
-            const area = document.getElementById('unit-rows-area'); const id = Date.now();
-            area.insertAdjacentHTML('beforeend', `<div id="row-${id}" class="flex gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100 items-center"><select class="pk-sel flex-1 bg-white font-bold border-none px-3 py-2 rounded-lg">${Object.keys(PRICES).map(k=>`<option value="${k}">${k} PK</option>`).join('')}</select><input type="number" value="1" class="qty-in w-16 text-center bg-white font-bold rounded-lg py-2" onchange="window.updateFormTotal()"><button onclick="document.getElementById('row-${id}').remove(); window.updateFormTotal();" class="text-red-500 px-3"><i class="fas fa-trash"></i></button></div>`);
-            window.updateFormTotal();
+        function renderChatMessages() {
+            if(!activeChatContact) return;
+            const messages = JSON.parse(localStorage.getItem('kalimaja_chats')) || [];
+            const box = document.getElementById('chat-messages');
+            box.innerHTML = '';
+
+            let relevantChats = [];
+            if (activeUser.role === 'admin') {
+                relevantChats = messages.filter(m => (m.sender === activeChatContact && m.receiver === 'admin') || (m.sender === 'admin' && m.receiver === activeChatContact));
+            } else {
+                relevantChats = messages.filter(m => (m.sender === activeUser.email && m.receiver === 'admin') || (m.sender === 'admin' && m.receiver === activeUser.email));
+            }
+
+            if(relevantChats.length === 0) {
+                box.innerHTML = `<div class="flex h-full items-center justify-center text-slate-400 text-xs italic font-bold">Belum ada pesan. Ketik pesan pertama Anda di bawah ini.</div>`;
+                return;
+            }
+
+            relevantChats.forEach(m => {
+                const isMe = (activeUser.role === 'admin' && m.sender === 'admin') || (activeUser.role !== 'admin' && m.sender === activeUser.email);
+                const time = new Date(m.timestamp).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+                
+                if(isMe) {
+                    box.insertAdjacentHTML('beforeend', `
+                        <div class="flex justify-end">
+                            <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-none px-5 py-3 max-w-[75%] shadow-sm">
+                                <p class="text-sm font-medium leading-snug">${m.text}</p>
+                                <p class="text-[9px] text-indigo-200 mt-2 text-right font-bold">${time}</p>
+                            </div>
+                        </div>
+                    `);
+                } else {
+                    box.insertAdjacentHTML('beforeend', `
+                        <div class="flex justify-start">
+                            <div class="bg-white border-2 border-slate-100 text-slate-800 rounded-2xl rounded-tl-none px-5 py-3 max-w-[75%] shadow-sm">
+                                <p class="text-sm font-medium leading-snug">${m.text}</p>
+                                <p class="text-[9px] text-slate-400 mt-2 text-left font-bold">${time}</p>
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+            box.scrollTop = box.scrollHeight;
+        }
+
+        window.sendChatMessage = function() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if(!text || !activeChatContact) return;
+
+            const messages = JSON.parse(localStorage.getItem('kalimaja_chats')) || [];
+            const newMsg = {
+                id: Date.now(),
+                sender: activeUser.role === 'admin' ? 'admin' : activeUser.email,
+                receiver: activeUser.role === 'admin' ? activeChatContact : 'admin',
+                text: text,
+                timestamp: new Date().toISOString()
+            };
+
+            messages.push(newMsg);
+            localStorage.setItem('kalimaja_chats', JSON.stringify(messages));
+            
+            input.value = '';
+            renderChatMessages();
         };
+
+        // --- DASHBOARD LOGIC ---
+        function loadDashboard() {
+            document.getElementById('auth-screen').classList.add('hidden-el');
+            document.getElementById('app-content').classList.remove('hidden-el');
+            
+            setUI('user-display-name', activeUser.name);
+            setUI('user-role-badge', activeUser.role.toUpperCase());
+            
+            setUI('profile-name', activeUser.name);
+            setUI('profile-role', "Akses: " + activeUser.role);
+            setUI('profile-nik', activeUser.nik || "-");
+            setUI('profile-phone', activeUser.phone || "-");
+            setUI('profile-bank', activeUser.bank || "-");
+            setUI('profile-rek', activeUser.rek || "-");
+
+            const companyShareContainer = document.getElementById('company-share-container');
+            const bepContainer = document.getElementById('bep-container');
+
+            if(activeUser.role === 'admin') {
+                document.getElementById('admin-actions').classList.remove('hidden-el');
+                if (companyShareContainer) companyShareContainer.classList.remove('hidden-el');
+                if (bepContainer) bepContainer.classList.remove('hidden-el');
+                populateAdminDropdowns();
+            } else {
+                if (companyShareContainer) companyShareContainer.classList.add('hidden-el');
+                
+                if (bepContainer) {
+                    if (activeUser.role === 'customer') {
+                        bepContainer.classList.add('hidden-el');
+                    } else {
+                        bepContainer.classList.remove('hidden-el');
+                    }
+                }
+            }
+
+            switchView('dashboard'); 
+        }
+
+        // FUNGSI RENDER TABEL PROYEK (ADMIN ONLY)
+        window.renderProjectTable = function() {
+            let projects = JSON.parse(localStorage.getItem('kalimaja_projects')) || [];
+            let users = JSON.parse(localStorage.getItem('kalimaja_users')) || [];
+            
+            let tbody = document.getElementById('table-projects-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            if(projects.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400 italic">Belum ada proyek terdaftar.</td></tr>`;
+                return;
+            }
+
+            // Urutkan berdasarkan waktu pembuatan (yang pertama dibuat berada paling atas)
+            projects.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+
+            projects.forEach((p, index) => {
+                const cust = users.find(u => u.email === p.custEmail) || {};
+                const inv = users.find(u => u.email === p.invEmail) || {};
+                const totalUnits = p.units ? p.units.reduce((acc, curr) => acc + curr.q, 0) : 0;
+                
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr class="text-xs border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                        <td class="py-5 px-6 font-bold text-slate-500">${index + 1}</td>
+                        <td class="py-5 px-6 font-black text-indigo-900 uppercase">${p.location}</td>
+                        <td class="py-5 px-6 text-slate-600">
+                            <span class="font-bold block">${cust.name || '-'}</span>
+                            <span class="italic text-[10px]">${p.custEmail}</span>
+                        </td>
+                        <td class="py-5 px-6 text-slate-600">
+                            <span class="font-bold block">${inv.name || '-'}</span>
+                            <span class="italic text-[10px]">${p.invEmail}</span>
+                        </td>
+                        <td class="py-5 px-6 text-right font-bold text-indigo-600">${totalUnits} Unit</td>
+                        <td class="py-5 px-6 text-right font-mono text-slate-800 font-bold">${formatIDR(p.capex)}</td>
+                        <td class="py-5 px-6 text-center whitespace-nowrap">
+                            <button onclick="goToProjectFromAdmin('${p.id}')" class="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors inline-flex items-center gap-1 mr-1" title="Lihat Detail">
+                                <i class="fas fa-eye"></i> Detail
+                            </button>
+                            <button onclick="openEditProjectModal('${p.id}')" class="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors inline-flex items-center gap-1" title="Edit Proyek">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        };
+
+        // FUNGSI RENDER TABEL USER (ADMIN ONLY)
+        window.renderUserTable = function(roleType) {
+            let users = JSON.parse(localStorage.getItem('kalimaja_users')) || [];
+            let projects = JSON.parse(localStorage.getItem('kalimaja_projects')) || [];
+            let filtered = users.filter(u => u.role === roleType);
+            
+            let tbodyId = roleType === 'customer' ? 'table-customers-body' : 'table-investors-body';
+            let tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = '';
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400 italic">Belum ada data ${roleType} terdaftar.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((u, index) => {
+                let userProjs = [];
+                if (roleType === 'customer') {
+                    userProjs = projects.filter(p => p.custEmail === u.email);
+                } else if (roleType === 'investor') {
+                    userProjs = projects.filter(p => p.invEmail === u.email);
+                }
+
+                let projectHtml = '';
+                if (userProjs.length > 0) {
+                    projectHtml = userProjs.map(p => 
+                        `<button onclick="goToProjectFromAdmin('${p.id}')" class="block w-full text-left mb-1 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors truncate" title="${p.location}"><i class="fas fa-external-link-alt mr-1"></i> ${p.location}</button>`
+                    ).join('');
+                } else {
+                    projectHtml = '<span class="text-[10px] text-slate-400 italic">Belum ada proyek</span>';
+                }
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr class="text-xs border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                        <td class="py-5 px-6 font-bold text-slate-500">${index + 1}</td>
+                        <td class="py-5 px-6 font-black text-indigo-900">${u.name}</td>
+                        <td class="py-5 px-6 text-slate-600 italic">${u.email}</td>
+                        <td class="py-5 px-6 font-mono text-slate-600">${u.nik || '-'}</td>
+                        <td class="py-5 px-6 font-mono text-slate-600">${u.phone || '-'}</td>
+                        <td class="py-5 px-6">
+                            <span class="text-slate-500 uppercase">${u.bank || '-'}</span> <br> 
+                            <span class="font-mono text-indigo-600 font-bold">${u.rek || '-'}</span>
+                        </td>
+                        <td class="py-5 px-6 max-w-[200px]">
+                            ${projectHtml}
+                        </td>
+                    </tr>
+                `);
+            });
+        };
+
+        function populateAdminDropdowns() {
+            let users = JSON.parse(localStorage.getItem('kalimaja_users')) || [];
+            let customers = users.filter(u => u.role === 'customer');
+            let investors = users.filter(u => u.role === 'investor');
+
+            const custSelect = document.getElementById('form-cust-email');
+            const invSelect = document.getElementById('form-inv-email');
+
+            if(custSelect) {
+                custSelect.innerHTML = '<option value="">-- Pilih Customer Terdaftar --</option>' + 
+                    customers.map(c => `<option value="${c.email}">${c.name} (${c.email})</option>`).join('');
+            }
+            if(invSelect) {
+                invSelect.innerHTML = '<option value="">-- Pilih Investor Terdaftar --</option>' + 
+                    investors.map(i => `<option value="${i.email}">${i.name} (${i.email})</option>`).join('');
+            }
+        }
+
+        window.refreshProjectData = function() {
+            let projects = JSON.parse(localStorage.getItem('kalimaja_projects')) || [];
+            let userProjects = [];
+
+            if (activeUser.role === 'admin') {
+                userProjects = projects;
+            } else if (activeUser.role === 'investor') {
+                userProjects = projects.filter(p => p.invEmail === activeUser.email);
+            } else {
+                userProjects = projects.filter(p => p.custEmail === activeUser.email);
+            }
+
+            const controls = document.getElementById('project-controls');
+            const selector = document.getElementById('proj-select');
+            const btnDeleteProj = document.getElementById('btn-delete-proj');
+
+            if (userProjects.length > 0) {
+                if (activeUser.role === 'admin' || userProjects.length > 1) {
+                    if (activeUser.role === 'admin') {
+                        controls.classList.remove('hidden-el');
+                        setUI('selector-subtitle', 'Admin Control Panel');
+                        setUI('selector-title', 'Pilih Proyek untuk Dimonitor / Diupdate');
+                        if(btnDeleteProj) btnDeleteProj.classList.remove('hidden-el');
+                    } else if (activeUser.role === 'investor') {
+                        controls.classList.add('hidden-el'); 
+                        if(btnDeleteProj) btnDeleteProj.classList.add('hidden-el');
+                    } else {
+                        controls.classList.remove('hidden-el');
+                        setUI('selector-subtitle', 'Customer Dashboard');
+                        setUI('selector-title', 'Pilih Lokasi Proyek Anda');
+                        if(btnDeleteProj) btnDeleteProj.classList.add('hidden-el');
+                    }
+                    
+                    selector.innerHTML = userProjects.map(p => `<option value="${p.id}">${p.location} (Customer: ${p.custEmail})</option>`).join('');
+                    
+                    if(activeProject && userProjects.find(p => p.id === activeProject.id)) {
+                        selector.value = activeProject.id;
+                    } else {
+                        activeProject = userProjects[0];
+                        selector.value = activeProject.id;
+                    }
+                } else {
+                    controls.classList.add('hidden-el');
+                    activeProject = userProjects[0];
+                }
+            } else {
+                controls.classList.add('hidden-el');
+                activeProject = null;
+            }
+
+            if(activeProject) {
+                renderProjectData();
+            } else {
+                document.getElementById('empty-msg').classList.remove('hidden-el');
+                document.getElementById('dash-view').classList.add('hidden-el');
+                
+                if(activeUser.role === 'admin') {
+                    setUI('empty-msg-title', "Sistem Menunggu Input Proyek");
+                    setUI('empty-msg-desc', "Silakan daftarkan proyek baru dengan mengklik tombol 'Registrasi Kontrak' di menu sebelah kiri.");
+                } else if(activeUser.role === 'investor') {
+                    setUI('empty-msg-title', "Portofolio Masih Kosong");
+                    setUI('empty-msg-desc', "Sistem sedang menunggu Admin PT. Kalimaja untuk menghubungkan investasi Anda dengan proyek Customer.");
+                } else {
+                    setUI('empty-msg-title', "Belum Ada Proyek Aktif");
+                    setUI('empty-msg-desc', "Sistem sedang menunggu Admin PT. Kalimaja untuk menghubungkan email Anda dengan data proyek yang berjalan.");
+                }
+            }
+        };
+
+        window.changeActiveProject = function(projId) {
+            let projects = JSON.parse(localStorage.getItem('kalimaja_projects')) || [];
+            activeProject = projects.find(p => p.id === projId);
+            if(activeProject) renderProjectData();
+        };
+
+        // FUNGSI BARU: Edit Bank Data
+        window.openEditBankModal = function() {
+            if(!activeUser) return;
+            document.getElementById('edit-bank-name').value = activeUser.bank || '';
+            document.getElementById('edit-bank-rek').value = activeUser.rek || '';
+            uiModal('bank-modal', true);
+        };
+
+        window.saveBankData = function() {
+            if(!activeUser) return;
+            const newBank = document.getElementById('edit-bank-name').value;
+            const newRek = document.getElementById('edit-bank-rek').value;
+
+            if(!newBank || !newRek) return alert("Nama Bank dan Nomor Rekening tidak boleh kosong.");
+
+            let users = JSON.parse(localStorage.getItem('kalimaja_users')) || [];
+            const index = users.findIndex(u => u.email === activeUser.email);
+            
+            if(index > -1) {
+                users[index].bank = newBank;
+                users[index].rek = newRek;
+                localStorage.setItem('kalimaja_users', JSON.stringify(users));
+                
+                activeUser.bank = newBank;
+                activeUser.rek = newRek;
+                localStorage.setItem('kalimaja_session', JSON.stringify(activeUser));
+                
+                setUI('profile-bank', newBank);
+                setUI('profile-rek', newRek);
+                
+                if (activeUser.role === 'admin') {
+                    if (!document.getElementById('view-customers').classList.contains('hidden-el')) renderUserTable('customer');
+                    if (!document.getElementById('view-investors').classList.contains('hidden-el')) renderUserTable('investor');
+                }
+
+                uiModal('bank-modal', false);
+            } else {
+                alert("Terjadi kesalahan, user tidak ditemukan.");
+            }
+        };
+
+        function renderProjectData() {
+            document.getElementById('empty-msg').classList.add('hidden-el');
+            document.getElementById('dash-view').classList.remove('hidden-el');
+            
+            const users = JSON.parse(localStorage.getItem('kalimaja_users')) || [];
+            const custObj = users.find(u => u.email === activeProject.custEmail) || {};
+            const custNameDisplay = custObj.name || "Customer Tidak Diketahui";
+            
+            setUI('view-loc-name', activeProject.location.toUpperCase());
+            setUI('view-cust-email', `CUSTOMER: ${custNameDisplay.toUpperCase()} (${activeProject.custEmail})`);
+            setUI('view-unit-q', activeProject.units.reduce((a,b)=>a+b.q,0) + " Unit Terpasang");
+            setUI('view-base', Math.round(activeProject.baseline) + " kWh");
+            setUI('view-capex', formatIDR(activeProject.capex));
+            setUI('view-hours', activeProject.hours + " Jam");
+            setUI('view-days', activeProject.days + " Hari");
+            setUI('view-inv-email', activeProject.invEmail);
+
+            let logs = JSON.parse(localStorage.getItem('kalimaja_logs')) || [];
+            logs = logs.filter(l => l.projectId === activeProject.id);
+            
+            const table = document.getElementById('view-table-body');
+            table.innerHTML = "";
+
+            if(logs.length > 0) {
+                logs.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+                const latest = logs[0];
+                
+                const biayaNormal = activeProject.baseline * TARIF_PLN;
+                const biayaAktual = latest.kwhReal * TARIF_PLN;
+                const savingIdr = Math.max(0, biayaNormal - biayaAktual);
+                
+                // LOGIKA SPLIT RASIO (Dinamis: 70/30, 60/40, 50/50 berdasarkan masa tahun)
+                const latestSplit = getSplitRatio(activeProject.createdAt, latest.period);
+                const tagihanInvestorGross = savingIdr * latestSplit.invGross;
+                
+                // Laba Internal Konstan (Dari Total Tagihan -> Net Investor 70%, Perusahaan 30%)
+                const invNetProfit = tagihanInvestorGross * 0.7;
+                const companyProfit = tagihanInvestorGross * 0.3;
+                const capexVal = activeProject.capex || 0;
+                
+                setUI('view-cost-normal', formatIDR(biayaNormal));
+                setUI('view-cost-actual', formatIDR(biayaAktual));
+                
+                setUI('view-saving-idr', formatIDR(savingIdr));
+                setUI('view-share-cust', formatIDR(savingIdr * latestSplit.cust)); 
+                
+                // Pembedaan tampilan untuk Customer vs Admin/Investor
+                if (activeUser.role === 'customer') {
+                    setUI('view-share-inv', formatIDR(tagihanInvestorGross)); 
+                    setUI('label-share-inv', `Tagihan Investor (${Math.round(latestSplit.invGross * 100)}%)`);
+                } else {
+                    setUI('view-share-inv', formatIDR(invNetProfit)); 
+                    setUI('label-share-inv', `Net Profit Investor (70% dari Tagihan)`);
+                }
+                
+                setUI('view-share-company', formatIDR(companyProfit));
+                document.getElementById('view-bar').style.width = "100%";
+                
+                // UPDATE LABEL DENGAN PERSENTASE AKTUAL BERDASARKAN TAHUN
+                setUI('label-share-cust', `Customer Share (${Math.round(latestSplit.cust * 100)}%) - Tahun Ke-${latestSplit.year}`);
+                setUI('label-share-company', `Laba Perusahaan (30% dari Tagihan)`);
+
+                let bepVal = "0.0 Bulan";
+                if(invNetProfit > 0 && capexVal > 0) {
+                    bepVal = (capexVal / invNetProfit).toFixed(1) + " Bulan";
+                }
+                setUI('view-bep', bepVal);
+                
+                // RENDER BREAKDOWN PER UNIT
+                const breakdownSect = document.getElementById('breakdown-section');
+                if(breakdownSect) {
+                    breakdownSect.classList.remove('hidden-el');
+                    setUI('breakdown-period-badge', 'Bulan: ' + latest.period);
+                    
+                    const bdGrid = document.getElementById('breakdown-grid');
+                    let unitIndex = 1;
+                    let gridHtml = '';
+                    let totalCalc = 0;
+
+                    activeProject.units.forEach(u => {
+                        for(let i=0; i<u.q; i++) {
+                            let kwhVal = 0;
+                            if(latest.breakdown && latest.breakdown.length > 0) {
+                                const found = latest.breakdown.find(b => b.unit == unitIndex);
+                                if(found) kwhVal = parseFloat(found.kwh) || 0;
+                            }
+                            totalCalc += kwhVal;
+                            
+                            gridHtml += `
+                                <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col items-center justify-center text-center gap-1 shadow-sm">
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Unit ${unitIndex} <span class="bg-indigo-50 text-indigo-600 px-1 py-0.5 rounded ml-1">${u.pk} PK</span></span>
+                                    <span class="text-xl font-black text-indigo-900 mt-1">${formatNum(kwhVal)} <span class="text-[10px] text-slate-500">kWh</span></span>
+                                </div>
+                            `;
+                            unitIndex++;
+                        }
+                    });
+                    
+                    bdGrid.innerHTML = gridHtml;
+                    setUI('breakdown-total', formatNum(totalCalc) + ' kWh');
+                }
+
+                logs.forEach(l => {
+                    const s = Math.max(0, (activeProject.baseline - l.kwhReal) * 1615);
+                    const logSplit = getSplitRatio(activeProject.createdAt, l.period);
+                    const tagihanInvestorGrossTable = s * logSplit.invGross; 
+                    
+                    const startDate = new Date(activeProject.createdAt || Date.now());
+                    const endDate = new Date(startDate);
+                    endDate.setMonth(endDate.getMonth() + 36);
+                    const endDateStr = endDate.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+
+                    const statusLabel = l.status === 'paid' ? 'LUNAS' : 'BELUM DIBAYAR';
+                    const statusClass = l.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
+                    
+                    let actionBtn = '';
+                    if (activeUser.role === 'admin') {
+                        actionBtn = `<div class="mt-3 flex flex-col items-center justify-center gap-2">`;
+                        actionBtn += `<button onclick="printInvoice('${l.id || l.timestamp}')" class="text-[9px] font-bold text-slate-600 hover:text-slate-900 underline uppercase tracking-widest transition-all" title="Cetak Tagihan"><i class="fas fa-print"></i> Cetak Invoice</button>`;
+                        if (l.status !== 'paid') {
+                            actionBtn += `<button onclick="markAsPaid('${l.id || l.timestamp}')" class="text-[9px] font-bold text-indigo-600 hover:text-indigo-800 underline uppercase tracking-widest transition-all" title="Tandai Lunas"><i class="fas fa-check-circle"></i> Tandai Lunas</button>`;
+                            actionBtn += `<button onclick="editKwh('${l.id || l.timestamp}')" class="text-[9px] font-bold text-blue-500 hover:text-blue-700 underline uppercase tracking-widest transition-all" title="Edit kWh"><i class="fas fa-edit"></i> Edit Data</button>`;
+                        }
+                        actionBtn += `<button onclick="deleteKwh('${l.id || l.timestamp}')" class="text-[9px] font-bold text-red-500 hover:text-red-700 underline uppercase tracking-widest transition-all" title="Hapus Data"><i class="fas fa-trash-alt"></i> Hapus Data</button>`;
+                        actionBtn += `</div>`;
+                    }
+
+                    // TAMPILKAN LABEL RASIO DI TABEL (CONTOH: "Inv 60% : Cust 40%")
+                    const rasioLabel = `Inv ${Math.round(logSplit.invGross * 100)}% : Cust ${Math.round(logSplit.cust * 100)}%`;
+
+                    table.insertAdjacentHTML('beforeend', `
+                        <tr class="text-xs font-bold italic border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                            <td class="py-5 px-6">${l.period}</td>
+                            <td class="py-5 px-6 text-right text-indigo-600">${formatNum(l.kwhReal)} kWh</td>
+                            <td class="py-5 px-6 text-right text-emerald-600">${formatIDR(s)}</td>
+                            <td class="py-5 px-6 text-right font-black text-indigo-700 text-sm">
+                                ${formatIDR(tagihanInvestorGrossTable)} <br>
+                                <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded mt-1 inline-block">${rasioLabel}</span>
+                            </td>
+                            <td class="py-5 px-6 text-center text-amber-600">${endDateStr}</td>
+                            <td class="py-5 px-6 text-center leading-tight">
+                                <span class="status-pill ${statusClass}">${statusLabel}</span>
+                                ${actionBtn}
+                            </td>
+                        </tr>
+                    `);
+                });
+            } else {
+                const breakdownSect = document.getElementById('breakdown-section');
+                if(breakdownSect) breakdownSect.classList.add('hidden-el');
+                
+                setUI('view-cost-normal', "Rp 0");
+                setUI('view-cost-actual', "Rp 0");
+                setUI('view-saving-idr', "Rp 0");
+                setUI('view-share-cust', "Rp 0");
+                setUI('view-share-inv', "Rp 0");
+                setUI('view-share-company', "Rp 0");
+                setUI('view-bep', "0.0 Bulan");
+                
+                // Penyesuaian label saat data kosong
+                if (activeUser.role === 'customer') {
+                    setUI('label-share-inv', `Tagihan Investor`);
+                } else {
+                    setUI('label-share-inv', `Net Profit Investor`);
+                }
+            }
+            
+            renderInvestorPortfolio(); 
+        }
+
+        // FUNGSI RENDER PORTOFOLIO INVESTOR (KARTU)
+        function renderInvestorPortfolio() {
+            const invPortSect = document.getElementById('investor-portfolio-section');
+            if(!invPortSect) return;
+
+            if(activeUser.role !== 'investor') {
+                invPortSect.classList.add('hidden-el');
+                return;
+            }
+
+            let projects = JSON.parse(localStorage.getItem('kalimaja_projects')) || [];
+            let userProjects = projects.filter(p => p.invEmail === activeUser.email);
+
+            if(userProjects.length > 0) {
+                invPortSect.classList.remove('hidden-el');
+                const users = JSON.parse(localStorage.getItem('kalimaja_users')) || [];
+                let gridHtml = '';
+                userProjects.forEach(p => {
+                    const cust = users.find(u => u.email === p.custEmail) || {};
+                    const custName = cust.name || p.custEmail;
+                    const totalUnits = p.units.reduce((a,b)=>a+b.q,0);
+                    const isActive = activeProject && activeProject.id === p.id;
+
+                    gridHtml += `
+                        <div class="bg-white p-6 rounded-[2rem] border ${isActive ? 'border-indigo-500 shadow-lg ring-4 ring-indigo-500/10 scale-[1.02]' : 'border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md'} transition-all text-left flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="text-[10px] font-bold px-3 py-1 ${isActive ? 'bg-indigo-500 text-white' : 'bg-emerald-50 text-emerald-600'} rounded-lg uppercase tracking-widest">${isActive ? 'Sedang Dipantau' : 'Status Aktif'}</span>
+                                    <span class="text-xl ${isActive ? 'text-indigo-600' : 'text-slate-300'}"><i class="fas fa-chart-pie"></i></span>
+                                </div>
+                                <h4 class="text-xl font-black italic uppercase text-slate-900 leading-tight mb-1 line-clamp-2">${p.location}</h4>
+                                <p class="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-1 truncate"><i class="fas fa-building mr-1"></i> ${custName}</p>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">${p.custEmail}</p>
+                            </div>
+                            <div class="pt-4 border-t border-slate-100 flex justify-between items-center mt-4 mb-4">
+                                <div>
+                                    <span class="block text-[9px] font-black text-slate-400 uppercase mb-1">Total CAPEX</span>
+                                    <span class="block text-sm font-bold text-indigo-900 mono">${formatIDR(p.capex)}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block text-[9px] font-black text-slate-400 uppercase mb-1">Populasi</span>
+                                    <span class="block text-sm font-bold text-indigo-900">${totalUnits} Unit</span>
+                                </div>
+                            </div>
+                            <button onclick="window.selectInvestorProject('${p.id}')" class="w-full bg-${isActive ? 'indigo-600 text-white' : 'indigo-50 text-indigo-700'} py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm">
+                                ${isActive ? 'Sedang Dilihat' : 'Lihat Dashboard Proyek'}
+                            </button>
+                        </div>
+                    `;
+                });
+                document.getElementById('investor-portfolio-grid').innerHTML = gridHtml;
+            } else {
+                invPortSect.classList.add('hidden-el');
+            }
+        }
+
+        // --- ADMIN FUNCTIONS ---
+        window.addACRow = function() {
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 bg-slate-50 p-4 rounded-xl items-center border border-slate-100';
+            div.innerHTML = `
+                <select class="pk-sel flex-1 bg-white border-2 border-slate-100 font-bold text-slate-800 rounded-xl px-3 py-2">
+                    ${Object.keys(PRICES).map(k => `<option value="${k}">${k} PK</option>`).join('')}
+                </select>
+                <input type="number" value="1" class="qty-in w-20 bg-white border-2 border-slate-100 rounded-xl px-2 py-2 font-bold text-center">
+                <button onclick="this.parentElement.remove(); updateFormTotal();" class="text-red-500 bg-red-50 hover:bg-red-100 rounded-lg px-3 py-2 font-black transition-colors"><i class="fas fa-trash-alt"></i></button>
+            `;
+            document.getElementById('unit-rows-area').appendChild(div);
+            div.querySelectorAll('input, select').forEach(el => el.onchange = updateFormTotal);
+            updateFormTotal();
+        }
 
         window.updateFormTotal = function() {
             let total = 0;
             document.querySelectorAll('#unit-rows-area > div').forEach(r => {
-                const pk = r.querySelector('.pk-sel').value; const q = parseInt(r.querySelector('.qty-in').value) || 0;
+                const pk = r.querySelector('.pk-sel').value;
+                const q = parseInt(r.querySelector('.qty-in').value) || 0;
                 total += PRICES[pk] * q;
             });
-            document.getElementById('form-capex-display').innerText = formatIDR(total);
+            setUI('form-capex-display', formatIDR(total));
             return total;
-        };
-
-        window.populateAdminDropdowns = function() {
-            const customers = window.dbUsers.filter(u => u.role === 'customer');
-            const investors = window.dbUsers.filter(u => u.role === 'investor');
-            const rekanans = window.dbUsers.filter(u => u.role === 'rekanan');
-            const custEl = document.getElementById('form-cust-email');
-            const invEl = document.getElementById('form-inv-email');
-            if(custEl) custEl.innerHTML = '<option value="">-- Pilih Customer --</option>' + customers.map(c => `<option value="${c.email}">${c.name}</option>`).join('');
-            if(invEl) invEl.innerHTML = '<option value="">-- Pilih Investor --</option>' + investors.map(i => `<option value="${i.email}">${i.name}</option>`).join('');
-            const rekOptions = '<option value="">-- Tidak Ada --</option>' + rekanans.map(r => `<option value="${r.email}">${r.name}</option>`).join('');
-            if(document.getElementById('form-rek-cust')) document.getElementById('form-rek-cust').innerHTML = rekOptions;
-            if(document.getElementById('form-rek-inv')) document.getElementById('form-rek-inv').innerHTML = rekOptions;
-            if(document.getElementById('form-rek-tek')) document.getElementById('form-rek-tek').innerHTML = rekOptions;
-        };
+        }
 
         window.openNewProjectModal = function() {
-            window.editingProjectId = null;
-            window.uiModal('project-modal', true);
+            editingProjectId = null;
+            setUI('project-modal-title', 'Setup Kontrak Baru');
+            const btn = document.getElementById('project-modal-btn');
+            if(btn) btn.innerText = 'Aktifkan Kontrak';
+
+            document.getElementById('form-cust-email').value = '';
+            document.getElementById('form-inv-email').value = '';
+            document.getElementById('form-loc').value = '';
+            document.getElementById('form-hours').value = '12';
+            document.getElementById('form-days').value = '26';
+
             document.getElementById('unit-rows-area').innerHTML = '';
-            window.addACRow(); window.populateAdminDropdowns();
+            addACRow(); 
+            updateFormTotal();
+            
+            uiModal('project-modal', true);
         };
 
-        window.changeActiveProject = function(id) {
-            window.activeProject = window.dbProjects.find(p => p.id === id);
-            window.renderProjectData();
+        window.openEditProjectModal = function(projId) {
+            let projects = JSON.parse(localStorage.getItem('kalimaja_projects')) || [];
+            const proj = projects.find(p => p.id === projId);
+            if(!proj) return alert("Proyek tidak ditemukan.");
+
+            editingProjectId = projId;
+            setUI('project-modal-title', 'Edit Kontrak Proyek');
+            const btn = document.getElementById('project-modal-btn');
+            if(btn) btn.innerText = 'Simpan Perubahan';
+
+            // Populate the dropdowns first to ensure values exist
+            populateAdminDropdowns();
+
+            document.getElementById('form-cust-email').value = proj.custEmail;
+            document.getElementById('form-inv-email').value = proj.invEmail;
+            document.getElementById('form-loc').value = proj.location;
+            document.getElementById('form-hours').value = proj.hours;
+            document.getElementById('form-days').value = proj.days;
+
+            document.getElementById('unit-rows-area').innerHTML = '';
+            if(proj.units && proj.units.length > 0) {
+                proj.units.forEach(u => addACRow(u.pk, u.q));
+            } else {
+                addACRow();
+            }
+            
+            updateFormTotal();
+            uiModal('project-modal', true);
         };
 
-        window.clearAllData = async function() {
-            if(confirm("Hapus seluruh data Cloud?")) {
-                for(let u of window.dbUsers) await deleteDoc(getPubDoc('users', u.email));
+        window.saveProject = function() {
+            const custEmail = document.getElementById('form-cust-email').value.toLowerCase();
+            const invEmail = document.getElementById('form-inv-email').value.toLowerCase();
+            const loc = document.getElementById('form-loc').value;
+            const h = parseInt(document.getElementById('form-hours').value) || 12;
+            const d = parseInt(document.getElementById('form-days').value) || 26;
+
+            if(!custEmail || !invEmail || !loc) return alert("Pilih Email Customer, Investor, & Isi Lokasi Gedung!");
+
+            let units = []; let totalWatt = 0;
+            document.querySelectorAll('#unit-rows-area > div').forEach(r => {
+                const pk = r.querySelector('.pk-sel').value;
+                const q = parseInt(r.querySelector('.qty-in').value) || 0;
+                if(q > 0) { units.push({pk, q}); totalWatt += WATTS[pk] * q; }
+            });
+
+            if(units.length === 0) return alert("Tambahkan minimal 1 Unit AC.");
+
+            let projects = JSON.parse(localStorage.getItem('kalimaja_projects')) || [];
+            
+            if (editingProjectId) {
+                const index = projects.findIndex(p => p.id === editingProjectId);
+                if (index > -1) {
+                    projects[index].custEmail = custEmail;
+                    projects[index].invEmail = invEmail;
+                    projects[index].location = loc;
+                    projects[index].capex = updateFormTotal();
+                    projects[index].baseline = (totalWatt/1000) * h * d;
+                    projects[index].hours = h;
+                    projects[index].days = d;
+                    projects[index].units = units;
+                    
+                    if(activeProject && activeProject.id === editingProjectId) {
+                        activeProject = projects[index]; 
+                    }
+                    alert("Perubahan Proyek Berhasil Disimpan!");
+                }
+            } else {
+                const newProj = {
+                    id: 'PRJ-' + Date.now(),
+                    custEmail: custEmail,
+                    invEmail: invEmail,
+                    location: loc,
+                    capex: updateFormTotal(),
+                    baseline: (totalWatt/1000) * h * d,
+                    hours: h,
+                    days: d,
+                    units: units,
+                    createdAt: new Date().toISOString()
+                };
+                projects.push(newProj);
+                activeProject = newProj; 
+                alert("Kontrak Proyek Berhasil Diaktifkan!");
+            }
+
+            localStorage.setItem('kalimaja_projects', JSON.stringify(projects));
+            uiModal('project-modal', false);
+            editingProjectId = null;
+            refreshProjectData();
+            
+            if (!document.getElementById('view-projects').classList.contains('hidden-el')) {
+                renderProjectTable();
+            }
+        }
+
+        window.openKwhModal = function() {
+            if(!activeProject) return alert("Tidak ada proyek yang aktif untuk diupdate.");
+            editingLogId = null;
+            setUI('kwh-modal-title', 'Input Realisasi per Unit');
+            
+            const container = document.getElementById('kwh-inputs-container');
+            container.innerHTML = '';
+            
+            let unitIndex = 1;
+            activeProject.units.forEach(u => {
+                for(let i=0; i<u.q; i++) {
+                    container.insertAdjacentHTML('beforeend', `
+                        <div class="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-bold text-slate-700 uppercase tracking-widest">Unit ${unitIndex} <span class="text-[9px] font-black bg-indigo-50 text-indigo-600 px-2 py-1 rounded ml-1">${u.pk} PK</span></span>
+                            <input type="number" class="kwh-unit-input w-24 bg-slate-50 border-2 border-slate-100 text-indigo-900 rounded-xl px-3 py-2 text-right font-black outline-none focus:border-indigo-400 transition-all" placeholder="0" data-pk="${u.pk}" data-unit="${unitIndex}" oninput="calcDynamicKwhTotal()">
+                        </div>
+                    `);
+                    unitIndex++;
+                }
+            });
+            
+            document.getElementById('in-kwh-period').value = '';
+            setUI('in-kwh-total', '0 kWh');
+            uiModal('kwh-modal', true);
+        }
+
+        window.editKwh = function(logId) {
+            let logs = JSON.parse(localStorage.getItem('kalimaja_logs')) || [];
+            const logToEdit = logs.find(l => (l.id || l.timestamp) === logId);
+            if(!logToEdit) return alert("Data riwayat tidak ditemukan.");
+            if(logToEdit.status === 'paid') return alert("Tagihan yang sudah LUNAS tidak dapat diedit lagi demi keamanan data.");
+
+            editingLogId = logId;
+            setUI('kwh-modal-title', 'Edit Realisasi per Unit');
+            
+            const container = document.getElementById('kwh-inputs-container');
+            container.innerHTML = '';
+            
+            let unitIndex = 1;
+            activeProject.units.forEach(u => {
+                for(let i=0; i<u.q; i++) {
+                    let existingVal = '';
+                    if(logToEdit.breakdown && logToEdit.breakdown.length > 0) {
+                        const found = logToEdit.breakdown.find(b => b.unit == unitIndex);
+                        if(found) existingVal = found.kwh;
+                    }
+
+                    container.insertAdjacentHTML('beforeend', `
+                        <div class="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-bold text-slate-700 uppercase tracking-widest">Unit ${unitIndex} <span class="text-[9px] font-black bg-indigo-50 text-indigo-600 px-2 py-1 rounded ml-1">${u.pk} PK</span></span>
+                            <input type="number" class="kwh-unit-input w-24 bg-slate-50 border-2 border-slate-100 text-indigo-900 rounded-xl px-3 py-2 text-right font-black outline-none focus:border-indigo-400 transition-all" placeholder="0" data-pk="${u.pk}" data-unit="${unitIndex}" value="${existingVal}" oninput="calcDynamicKwhTotal()">
+                        </div>
+                    `);
+                    unitIndex++;
+                }
+            });
+            
+            document.getElementById('in-kwh-period').value = logToEdit.period;
+            calcDynamicKwhTotal(); 
+            uiModal('kwh-modal', true);
+        }
+
+        window.calcDynamicKwhTotal = function() {
+            let total = 0;
+            document.querySelectorAll('.kwh-unit-input').forEach(inp => {
+                total += parseFloat(inp.value) || 0;
+            });
+            setUI('in-kwh-total', formatNum(total) + ' kWh');
+        }
+
+        window.saveKwh = function() {
+            const period = document.getElementById('in-kwh-period').value;
+            if(!period) return alert("Pilih Periode Bulan Tagihan!");
+            
+            let totalVal = 0;
+            let breakdownData = [];
+            let allFilled = true;
+
+            document.querySelectorAll('.kwh-unit-input').forEach(inp => {
+                const val = parseFloat(inp.value);
+                if(isNaN(val)) allFilled = false;
+                totalVal += val || 0;
+                
+                breakdownData.push({
+                    unit: inp.getAttribute('data-unit'),
+                    pk: inp.getAttribute('data-pk'),
+                    kwh: val || 0
+                });
+            });
+
+            if(!allFilled) return alert("Harap isi nilai kWh untuk seluruh unit. Isi dengan 0 jika unit tidak menyala.");
+            if(totalVal <= 0) return alert("Total kWh akumulasi tidak boleh 0.");
+
+            let logs = JSON.parse(localStorage.getItem('kalimaja_logs')) || [];
+
+            if (editingLogId) {
+                const index = logs.findIndex(l => (l.id || l.timestamp) === editingLogId);
+                if (index > -1) {
+                    logs[index].period = period;
+                    logs[index].kwhReal = totalVal;
+                    logs[index].breakdown = breakdownData;
+                }
+            } else {
+                logs.push({
+                    id: 'LOG-' + Date.now(),
+                    projectId: activeProject.id,
+                    period: period,
+                    kwhReal: totalVal,
+                    breakdown: breakdownData, 
+                    status: 'unpaid',
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            localStorage.setItem('kalimaja_logs', JSON.stringify(logs));
+            uiModal('kwh-modal', false);
+            editingLogId = null;
+            refreshProjectData();
+        }
+
+        window.printInvoice = function(logId) {
+            let logs = JSON.parse(localStorage.getItem('kalimaja_logs')) || [];
+            const log = logs.find(l => (l.id || l.timestamp) === logId);
+            if(!log) return alert("Data riwayat tidak ditemukan.");
+
+            let projects = JSON.parse(localStorage.getItem('kalimaja_projects')) || [];
+            const proj = projects.find(p => p.id === log.projectId);
+            if(!proj) return alert("Data proyek tidak ditemukan.");
+
+            const users = JSON.parse(localStorage.getItem('kalimaja_users')) || [];
+            const cust = users.find(u => u.email === proj.custEmail) || {};
+
+            const split = getSplitRatio(proj.createdAt, log.period);
+            const biayaNormal = proj.baseline * TARIF_PLN;
+            const biayaAktual = log.kwhReal * TARIF_PLN;
+            const savingIdr = Math.max(0, biayaNormal - biayaAktual);
+            const tagihanInvestorGross = savingIdr * split.invGross; 
+
+            const now = new Date();
+            setUI('inv-date', 'Tanggal: ' + now.toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'}));
+            setUI('inv-number', 'INV-' + (log.id ? log.id.replace('LOG-', '') : Date.now().toString().slice(-6)));
+            
+            setUI('inv-cust-name', cust.name || proj.custEmail);
+            setUI('inv-cust-loc', proj.location);
+            setUI('inv-period', log.period);
+
+            setUI('inv-val-normal', formatIDR(biayaNormal));
+            setUI('inv-val-actual', formatIDR(biayaAktual));
+            setUI('inv-val-saving', formatIDR(savingIdr));
+            setUI('inv-val-total', formatIDR(tagihanInvestorGross));
+            
+            setUI('inv-label-total', `Total Tagihan Bagi Hasil (Porsi Investor ${Math.round(split.invGross * 100)}%)`);
+
+            setUI('inv-bank-name', 'BANK TRANSFER (REKENING RESMI)');
+            setUI('inv-bank-rek', '6044837263');
+            setUI('inv-bank-owner', 'A.n KALIMAJA SURYA ALAM PT');
+
+            document.body.classList.add('invoice-mode');
+            window.print();
+            
+            setTimeout(() => {
+                document.body.classList.remove('invoice-mode');
+            }, 1000);
+        }
+
+        window.markAsPaid = function(logId) {
+            if(!confirm("Yakin menandai tagihan/bagi hasil ini sebagai LUNAS?")) return;
+            let logs = JSON.parse(localStorage.getItem('kalimaja_logs')) || [];
+            const index = logs.findIndex(l => (l.id || l.timestamp) === logId);
+            if(index > -1) {
+                logs[index].status = 'paid';
+                localStorage.setItem('kalimaja_logs', JSON.stringify(logs));
+                refreshProjectData(); 
+            }
+        }
+
+        window.deleteKwh = function(logId) {
+            if(!confirm("PERINGATAN! Anda yakin ingin menghapus data riwayat konsumsi untuk periode ini secara permanen?")) return;
+            
+            let logs = JSON.parse(localStorage.getItem('kalimaja_logs')) || [];
+            logs = logs.filter(l => (l.id || l.timestamp) !== logId);
+            
+            localStorage.setItem('kalimaja_logs', JSON.stringify(logs));
+            refreshProjectData();
+        }
+
+        window.deleteActiveProject = function() {
+            if(!activeProject) return alert("Pilih proyek yang akan dihapus.");
+            
+            const konfirmasi = confirm(`PERINGATAN!\n\nAnda yakin ingin membatalkan dan menghapus proyek di lokasi "${activeProject.location}"?\n\nSemua riwayat pemakaian dan tagihan untuk proyek ini akan dihapus secara permanen dari sistem.`);
+            
+            if(konfirmasi) {
+                let projects = JSON.parse(localStorage.getItem('kalimaja_projects')) || [];
+                projects = projects.filter(p => p.id !== activeProject.id);
+                localStorage.setItem('kalimaja_projects', JSON.stringify(projects));
+                
+                let logs = JSON.parse(localStorage.getItem('kalimaja_logs')) || [];
+                logs = logs.filter(l => l.projectId !== activeProject.id);
+                localStorage.setItem('kalimaja_logs', JSON.stringify(logs));
+                
+                alert("Proyek berhasil dibatalkan dan dihapus.");
+                
+                activeProject = null;
+                refreshProjectData();
+            }
+        }
+
+        window.clearAllData = function() {
+            if(confirm("PERINGATAN: Seluruh data Proyek, User, dan Riwayat akan dihapus. Anda yakin?")) {
+                localStorage.clear();
                 location.reload();
             }
-        };
-
-        window.doLogout = function() { sessionStorage.clear(); location.reload(); };
-
-        // --- SISTEM CHAT ---
-        window.openChatView = function() {
-            window.switchView('view-chat');
-            const contactBox = document.getElementById('chat-contacts');
-            if(window.activeUser.role === 'admin') {
-                contactBox.classList.remove('hidden-el'); window.renderChatContacts();
-            } else {
-                contactBox.classList.add('hidden-el'); window.activeChatContact = 'admin';
-                setUI('chat-active-name', 'TIM SUPPORT KALIMAJA'); setUI('chat-active-role', 'Layanan Pelanggan');
-                window.renderChatMessages();
-            }
-        };
-
-        window.renderChatContacts = function() {
-            const list = document.getElementById('contact-list'); list.innerHTML = '';
-            window.dbUsers.filter(u => u.role !== 'admin').forEach(u => {
-                const isActive = window.activeChatContact === u.email;
-                list.insertAdjacentHTML('beforeend', `<div onclick="window.selectChatContact('${u.email}', '${u.name}', '${u.role}')" class="p-4 rounded-xl cursor-pointer transition-all mb-2 ${isActive ? 'bg-indigo-50 border border-indigo-200' : 'bg-slate-50'}"><p class="font-black text-sm uppercase">${u.name}</p><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">${u.role} - ${u.email}</p></div>`);
-            });
-            if(!window.activeChatContact && window.dbUsers.filter(u => u.role !== 'admin').length > 0) window.selectChatContact(window.dbUsers.find(u => u.role !== 'admin').email, window.dbUsers.find(u => u.role !== 'admin').name, window.dbUsers.find(u => u.role !== 'admin').role);
-        };
-
-        window.selectChatContact = function(email, name, role) {
-            window.activeChatContact = email; setUI('chat-active-name', name); setUI('chat-active-role', role);
-            if(window.activeUser.role === 'admin') window.renderChatContacts(); window.renderChatMessages();
-        };
-
-        window.renderChatMessages = function() {
-            if(!window.activeChatContact) return;
-            const box = document.getElementById('chat-messages'); box.innerHTML = '';
-            let relevantChats = window.dbChats.filter(m => (window.activeUser.role === 'admin' ? (m.sender === window.activeChatContact && m.receiver === 'admin') || (m.sender === 'admin' && m.receiver === window.activeChatContact) : (m.sender === window.activeUser.email && m.receiver === 'admin') || (m.sender === 'admin' && m.receiver === window.activeUser.email)));
-            relevantChats.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
-            relevantChats.forEach(m => {
-                const isMe = (window.activeUser.role === 'admin' && m.sender === 'admin') || (window.activeUser.role !== 'admin' && m.sender === window.activeUser.email);
-                box.insertAdjacentHTML('beforeend', `<div class="flex ${isMe ? 'justify-end' : 'justify-start'}"><div class="${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border-slate-200 text-slate-800 rounded-tl-none border'} rounded-2xl px-5 py-3 max-w-[75%] shadow-sm"><p class="text-sm font-medium leading-snug">${m.text}</p></div></div>`);
-            });
-            box.scrollTop = box.scrollHeight;
-        };
-
-        window.sendChatMessage = async function() {
-            const input = document.getElementById('chat-input'); const text = input.value.trim();
-            if(!text || !window.activeChatContact) return;
-            const msgId = 'MSG-' + Date.now();
-            const newMsg = { id: msgId, sender: window.activeUser.role === 'admin' ? 'admin' : window.activeUser.email, receiver: window.activeUser.role === 'admin' ? window.activeChatContact : 'admin', text: text, timestamp: new Date().toISOString(), read: false };
-            try { await setDoc(getPubDoc('chats', msgId), newMsg); input.value = ''; window.showToast("Pesan terkirim."); } catch(e) { alert("Gagal kirim pesan."); }
-        };
-
-        function checkDone() {
-            if (isReady.users && isReady.projs && isReady.logs && isReady.chats) {
-                const sessionEmail = sessionStorage.getItem('kalimaja_session_email');
-                if (sessionEmail && !window.activeUser) {
-                    const u = window.dbUsers.find(x => x.email === sessionEmail);
-                    if (u) { window.activeUser = u; window.loadDashboard(); }
-                }
-            }
         }
-
-        // --- INIT FIREBASE SINKRONISASI BYPASS ---
-        async function startSystem() {
-            // Hilangkan loader dalam 4 detik, apapun kondisinya (Mencegah Layar Putih)
-            setTimeout(() => {
-                const loader = document.getElementById('cloud-loader');
-                if(loader) loader.style.display = 'none';
-                if(!window.activeUser) {
-                    const authScreen = document.getElementById('auth-screen');
-                    if(authScreen) authScreen.classList.remove('hidden-el');
-                }
-            }, 4000);
-
-            try {
-                // Menangkap semua error autentikasi agar proses tidak berhenti
-                await signInAnonymously(auth).catch(e => console.warn("Melanjutkan mode public."));
-
-                // Membaca data publik
-                onSnapshot(getPubPath("users"), s => { window.dbUsers = s.docs.map(d => d.data()); isReady.users = true; checkDone(); window.autoRefreshUI(); }, e => { isReady.users = true; checkDone(); });
-                onSnapshot(getPubPath("projects"), s => { window.dbProjects = s.docs.map(d => d.data()); isReady.projs = true; checkDone(); window.autoRefreshUI(); }, e => { isReady.projs = true; checkDone(); });
-                onSnapshot(getPubPath("logs"), s => { window.dbLogs = s.docs.map(d => d.data()); isReady.logs = true; checkDone(); window.autoRefreshUI(); }, e => { isReady.logs = true; checkDone(); });
-                onSnapshot(getPubPath("chats"), s => { window.dbChats = s.docs.map(d => d.data()); isReady.chats = true; checkDone(); window.autoRefreshUI(); }, e => { isReady.chats = true; checkDone(); });
-            } catch(e) { console.warn("Lanjut mode fallback."); }
-        }
-
-        startSystem();
     </script>
 </body>
 </html>
