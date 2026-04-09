@@ -190,6 +190,9 @@ function doLogin() {
     .catch(error => alert(error.message));
 }
 </script>
+auth.onAuthStateChanged(user => {
+  document.getElementById("cloud-loader").style.display = "none";
+});
     <body class="bg-slate-50 text-slate-900 min-h-screen text-left">
 
     <!-- CLOUD LOADER -->
