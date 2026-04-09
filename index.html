@@ -141,21 +141,7 @@
         };
     </script>
 </head>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBnvway6x7QTxv4kup7lW5TEKNwkocRdL4",
-  authDomain: "kalimaja-airtron-system.firebaseapp.com",
-  projectId: "kalimaja-airtron-system",
-  storageBucket: "kalimaja-airtron-system.firebasestorage.app",
-  messagingSenderId: "785700779057",
-  appId: "1:785700779057:web:b4e19c1908ffe680459110",
-};
 
-firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
-const db = firebase.firestore();
-</script>
 <script>
 function doRegister() {
   const email = document.getElementById("reg-email").value;
@@ -189,6 +175,21 @@ function doLogin() {
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBnvway6x7QTxv4kup7lW5TEKNwkocRdL4",
+  authDomain: "kalimaja-airtron-system.firebaseapp.com",
+  projectId: "kalimaja-airtron-system",
+  storageBucket: "kalimaja-airtron-system.firebasestorage.app",
+  messagingSenderId: "785700779057",
+  appId: "1:785700779057:web:b4e19c1908ffe680459110",
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+</script>
     <body class="bg-slate-50 text-slate-900 min-h-screen text-left">
 
     <!-- CLOUD LOADER -->
